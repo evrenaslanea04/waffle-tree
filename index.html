@@ -32,7 +32,6 @@
         .masa:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(255, 140, 0, 0.15); border-color: #ffe0b2; }
         .masa h2 { margin: 5px 0 10px 0; font-size: 19px; color: #444; font-weight: 700; word-break: break-word; }
         
-        /* Paket Servis Özel Tasarımı */
         .masa.paket-kart { background: #f4fbf7; border-color: #c8e6c9; }
         .masa.paket-kart h2 { color: #2e7d32; }
 
@@ -44,7 +43,7 @@
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
         .siparisKutusu { background: white; width: 1100px; max-width: 100%; height: 85vh; border-radius: 24px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .detayKutusu { background: white; width: 500px; max-width: 100%; max-height: 80vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .detayKutusu { background: white; width: 600px; max-width: 100%; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .ust { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f2ebe1; padding-bottom: 12px; margin-bottom: 18px; }
         .ust h2 { margin: 0; color: #ff8c00; font-size: 22px; }
         .ust-butonlar { display: flex; gap: 10px; }
@@ -83,9 +82,10 @@
         .odeme-btn.kart { color: #1565c0; border-color: #90caf9; }
         .odeme-btn.kart:hover { background: #e3f2fd; }
         .detay-liste-alan { flex: 1; overflow-y: auto; margin-bottom: 15px; }
-        .detay-tablo { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .detay-tablo { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
         .detay-tablo th, .detay-tablo td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
         .detay-tablo th { background: #fff3e0; color: #e65100; }
+        .paket-detay-baslik { font-size: 15px; font-weight: bold; color: #2e7d32; margin: 15px 0 8px 0; border-bottom: 2px solid #a5d6a7; padding-bottom: 4px; }
         .gecmis-panel { position: fixed; bottom: -440px; left: 0; width: 100%; height: 440px; background: #ffffff; box-shadow: 0 -6px 20px rgba(0,0,0,0.15); transition: bottom 0.3s ease; z-index: 1000; display: flex; flex-direction: column; border-radius: 24px 24px 0 0; }
         .gecmis-panel.acik { bottom: 0; }
         .gecmis-toggle-btn { position: absolute; top: -46px; left: 30px; background: #ff8c00; color: white; border: none; padding: 12px 22px; border-radius: 12px 12px 0 0; cursor: pointer; font-weight: bold; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
@@ -244,7 +244,7 @@
                     Toplam: <span id="toplam">0</span> ₺
                 </div>
 
-                <button class="odemeAlindi" onclick="odemeSecimModalAc()">✓ ÖDEME AL</button>
+                <button class="odemeAlindi" onclick="odemeAlTetikle()">✓ ÖDEME AL</button>
             </div>
         </div>
     </div>
@@ -270,7 +270,7 @@
             <h2 id="detayBaslik">Satış Detayı</h2>
             <button class="kapat" onclick="ekraniKapat('detayEkrani')">Kapat</button>
         </div>
-        <div class="detay-liste-alan">
+        <div class="detay-liste-alan" id="detayIcerik">
             <table class="detay-tablo">
                 <thead>
                     <tr>
@@ -281,6 +281,7 @@
                 </thead>
                 <tbody id="detayTabloBody"></tbody>
             </table>
+            <div id="paketDetayAlani"></div>
         </div>
     </div>
 </div>
@@ -334,12 +335,12 @@
     let bugunNakitCiro = 0;
     let bugunKartCiro = 0;
     let bugunUrunSatis = {};
+    let bugunPaketSatis = { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
     let gecmisGunler = [];
     let aktifIskontoOrani = 0;
 
     const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2','p3'];
 
-    // Varsayılan Etiket Adı Getirici
     function varsayilanIsimGetir(key) {
         if (key === 'p1') return "Paket 1";
         if (key === 'p2') return "Paket 2";
@@ -370,11 +371,13 @@
             bugunNakitCiro = data.nakit || 0;
             bugunKartCiro = data.kart || 0;
             bugunUrunSatis = data.urunler || {};
+            bugunPaketSatis = data.paketler || { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
         } else {
             bugunToplamCiro = 0;
             bugunNakitCiro = 0;
             bugunKartCiro = 0;
             bugunUrunSatis = {};
+            bugunPaketSatis = { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
         }
         bugunCirosunuGuncelle();
     });
@@ -394,7 +397,8 @@
             ciro: bugunToplamCiro,
             nakit: bugunNakitCiro,
             kart: bugunKartCiro,
-            urunler: bugunUrunSatis
+            urunler: bugunUrunSatis,
+            paketler: bugunPaketSatis
         });
     }
 
@@ -545,12 +549,12 @@
             return;
         }
 
-        let hedefMasa = prompt(`${varsayilanIsimGetir(seciliMasa)} siparişlerini nereye aktarmak istiyorsunuz? (Örn Masa için: 1-12 | Paket için: p1, p2, p3):`);
+        let hedefMasa = prompt(`${varsayilanIsimGetir(seciliMasa)} siparişlerini nereye aktarmak istiyorsunuz? (Masa: 1-12 | Paket: p1, p2, p3):`);
         if (!hedefMasa) return;
         hedefMasa = hedefMasa.trim().toLowerCase();
 
         if (!tumAlanIDleri.includes(hedefMasa)) {
-            alert("Geçersiz hedef! Lütfen 1-12 arasında bir masa veya p1, p2, p3 yazın.");
+            alert("Geçersiz hedef! Lütfen 1-12 arası masa veya p1, p2, p3 yazın.");
             return;
         }
 
@@ -572,15 +576,21 @@
 
         masalariKaydet();
         ekraniKapat('siparisEkrani');
-        alert(`Siparişler başarıyla ${varsayilanIsimGetir(hedefMasa)} alanına taşındı.`);
+        alert(`Siparişler ${varsayilanIsimGetir(hedefMasa)} alanına taşındı.`);
     }
 
-    function odemeSecimModalAc() {
+    function odemeAlTetikle() {
         if (!masalar[seciliMasa] || masalar[seciliMasa].length === 0) {
             alert("Bu masada sipariş bulunmuyor.");
             return;
         }
-        document.getElementById("odemeTipiEkrani").style.display = "flex";
+
+        // Eğer Paket 1, 2 veya 3 ise Kart-Nakit sormadan direkt kapat
+        if (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3') {
+            hesapKapat('Paket Servis');
+        } else {
+            document.getElementById("odemeTipiEkrani").style.display = "flex";
+        }
     }
 
     function hesapKapat(odemeYontemi) {
@@ -595,6 +605,11 @@
             bugunUrunSatis[urun.ad].adet += urun.adet;
         });
 
+        // Paket sipariş takibi
+        if (seciliMasa === 'p1') bugunPaketSatis["Paket 1"] = (bugunPaketSatis["Paket 1"] || 0) + odenecekTutar;
+        if (seciliMasa === 'p2') bugunPaketSatis["Paket 2"] = (bugunPaketSatis["Paket 2"] || 0) + odenecekTutar;
+        if (seciliMasa === 'p3') bugunPaketSatis["Paket 3"] = (bugunPaketSatis["Paket 3"] || 0) + odenecekTutar;
+
         bugunToplamCiro += odenecekTutar;
 
         if (odemeYontemi === 'Nakit') bugunNakitCiro += odenecekTutar;
@@ -602,7 +617,7 @@
 
         bugunVerileriniKaydet();
 
-        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar} ₺ (${odemeYontemi})`);
+        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar} ₺`);
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
@@ -705,6 +720,7 @@
                 let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
                 let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
                 let yeniUrunler = { ...(mevcutGun.urunler || {}) };
+                let yeniPaketler = { ...(mevcutGun.paketler || {}) };
 
                 for (let urunAdi in bugunUrunSatis) {
                     if (!yeniUrunler[urunAdi]) {
@@ -714,11 +730,16 @@
                     }
                 }
 
+                for (let p in bugunPaketSatis) {
+                    yeniPaketler[p] = (yeniPaketler[p] || 0) + (bugunPaketSatis[p] || 0);
+                }
+
                 db.collection("gecmis").doc(mevcutGun.id).update({
                     ciro: yeniCiro,
                     nakit: yeniNakit,
                     kart: yeniKart,
-                    urunler: yeniUrunler
+                    urunler: yeniUrunler,
+                    paketler: yeniPaketler
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
@@ -732,7 +753,8 @@
                     ciro: bugunToplamCiro,
                     nakit: bugunNakitCiro,
                     kart: bugunKartCiro,
-                    urunler: JSON.parse(JSON.stringify(bugunUrunSatis))
+                    urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
+                    paketler: JSON.parse(JSON.stringify(bugunPaketSatis))
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert("Gün başarıyla aktarıldı!");
@@ -746,6 +768,7 @@
         bugunNakitCiro = 0;
         bugunKartCiro = 0;
         bugunUrunSatis = {};
+        bugunPaketSatis = { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
         bugunVerileriniKaydet();
     }
 
@@ -768,6 +791,12 @@
                 }
             }
 
+            if (silinecekGun.paketler) {
+                for (let p in silinecekGun.paketler) {
+                    bugunPaketSatis[p] = (bugunPaketSatis[p] || 0) + (silinecekGun.paketler[p] || 0);
+                }
+            }
+
             db.collection("gecmis").doc(docId).delete().then(() => {
                 bugunVerileriniKaydet();
                 alert("Kayıt başarıyla geri yüklendi!");
@@ -775,20 +804,22 @@
         }
     }
 
-    function bugunDetayGoster() { tabloDoldur("Bugün Satılan Ürünler", bugunUrunSatis); }
+    function bugunDetayGoster() { tabloDoldur("Bugün Satış Detayı", bugunUrunSatis, bugunPaketSatis); }
 
     function gecmisDetayGosterDoc(docId) {
         let gun = gecmisGunler.find(g => g.id === docId);
-        if (gun) tabloDoldur(`${gun.tarih} Satış Detayı`, gun.urunler || {});
+        if (gun) tabloDoldur(`${gun.tarih} Satış Detayı`, gun.urunler || {}, gun.paketler || {});
     }
 
-    function tabloDoldur(baslik, urunler) {
+    function tabloDoldur(baslik, urunler, paketler) {
         document.getElementById("detayBaslik").innerText = baslik;
         let tbody = document.getElementById("detayTabloBody");
+        let paketAlani = document.getElementById("paketDetayAlani");
         tbody.innerHTML = "";
+        paketAlani.innerHTML = "";
 
         if (!urunler || Object.keys(urunler).length === 0) {
-            tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:#888;'>Bu güne ait ürün satışı bulunmuyor.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:#888;'>Ürün satışı bulunmuyor.</td></tr>";
         } else {
             for (let urunAdi in urunler) {
                 let item = urunler[urunAdi];
@@ -802,6 +833,28 @@
                 `;
             }
         }
+
+        let paketHtml = `<div class="paket-detay-baslik">🛵 Kurye & Paket Servis Toplamları</div><table class="detay-tablo">`;
+        let pVarMi = false;
+        if (paketler) {
+            for (let p in paketler) {
+                if (paketler[p] > 0) {
+                    pVarMi = true;
+                    paketHtml += `
+                        <tr>
+                            <td><strong>${p}</strong></td>
+                            <td style="text-align:right;"><strong>${paketler[p]} ₺</strong></td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+        if (!pVarMi) {
+            paketHtml += `<tr><td style="color:#888;">Bu dönem paket servis cirosu alınmadı.</td></tr>`;
+        }
+        paketHtml += `</table>`;
+        paketAlani.innerHTML = paketHtml;
+
         document.getElementById("detayEkrani").style.display = "flex";
     }
 </script>
