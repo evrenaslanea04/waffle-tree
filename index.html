@@ -800,6 +800,7 @@
                     <div class="gecmis-butonlar">
                         <button class="detay-btn" onclick="gecmisDetayGosterDoc('${gun.id}')">🔍 Detay</button>
                         <button class="geri-yukle-btn" onclick="gunuGeriYukleDoc('${gun.id}')">↩️ Geri Yükle</button>
+                        <button class="gunu-bitir-btn" style="padding: 5px 10px; font-size: 12px;" onclick="gecmisSilDoc('${gun.id}')">🗑️ Sil</button>
                     </div>
                 </div>
             `;
@@ -962,6 +963,26 @@
         paketAlani.innerHTML = paketHtml;
 
         document.getElementById("detayEkrani").style.display = "flex";
+    }
+    function gecmisSilDoc(docId) {
+        let silinecekGun = gecmisGunler.find(g => g.id === docId);
+        if (!silinecekGun) return;
+
+        let sifre = prompt(`${silinecekGun.tarih} tarihli kaydı silmek için lütfen yetkili şifresini girin:`);
+
+        if (sifre === null) return; // İptal edilirse çık
+
+        if (sifre === "serkan123") {
+            if (confirm(`${silinecekGun.tarih} tarihli ${silinecekGun.ciro} ₺ tutarındaki geçmiş kaydı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`)) {
+                db.collection("gecmis").doc(docId).delete().then(() => {
+                    alert("Geçmiş kayıt başarıyla silindi.");
+                }).catch((error) => {
+                    alert("Silme işlemi sırasında hata oluştu: " + error.message);
+                });
+            }
+        } else {
+            alert("❌ Hatalı şifre! Silme işlemi gerçekleştirilemedi.");
+        }
     }
 </script>
 
