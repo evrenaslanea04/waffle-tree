@@ -35,11 +35,15 @@
         .masa.paket-kart { background: #f4fbf7; border-color: #c8e6c9; }
         .masa.paket-kart h2 { color: #2e7d32; }
 
+        /* DOLU MASA YENİ BELİRGİN RENK TASARIMI */
+        .masa.is-dolu { background: #ffebee !important; border: 2px solid #ef5350 !important; box-shadow: 0 6px 15px rgba(229, 57, 53, 0.2) !important; }
+        .masa.is-dolu h2 { color: #c62828 !important; }
+        .masa.is-dolu::before { background: #d32f2f !important; }
+        .dolu { background: #e53935 !important; color: white !important; font-size: 16px; font-weight: 800; box-shadow: 0 2px 6px rgba(229, 57, 53, 0.3); }
+
         .durum-rozeti { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
         .masa.is-bos::before { background: #2cb67d; }
         .bos { background: #e8f8f0; color: #2cb67d; }
-        .masa.is-dolu::before { background: #e63946; }
-        .dolu { background: #fde8ea; color: #e63946; font-size: 16px; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
         .siparisKutusu { background: white; width: 1100px; max-width: 100%; height: 85vh; border-radius: 24px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -65,14 +69,27 @@
         .sepet-bolumu h3 { margin: 0 0 12px 0; border-bottom: 1px solid #e2d9cd; padding-bottom: 10px; color: #444; }
         .siparisListesi { flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 5px; }
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-        .adetButonlari button { border: none; background: #ff8c00; color: white; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; margin: 0 2px; font-weight: bold; }
+        
+        .ikram-urunu { text-decoration: line-through; color: #999; }
+        .ikram-rozeti { background: #e63946; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; text-decoration: none !important; display: inline-block; }
+        
+        .adetButonlari { display: flex; align-items: center; gap: 3px; }
+        .adetButonlari button { border: none; background: #ff8c00; color: white; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .ikram-btn-mini { background: #ff9800 !important; color: white !important; border: none; padding: 0 6px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .ikram-btn-mini.aktif-ikram { background: #e63946 !important; }
+
         .iskonto-alan { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .iskonto-baslik { font-size: 12px; font-weight: bold; color: #f57f17; margin-bottom: 5px; }
-        .iskonto-butonlar { display: flex; gap: 5px; }
-        .iskonto-btn { flex: 1; border: 1px solid #ffb300; background: white; color: #ff8f00; padding: 4px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .iskonto-baslik { font-size: 11px; font-weight: bold; color: #f57f17; margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .iskonto-satir { display: flex; gap: 5px; margin-bottom: 5px; }
+        .iskonto-btn { flex: 1; border: 1px solid #ffb300; background: white; color: #ff8f00; padding: 6px 2px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; text-align: center; }
         .iskonto-btn.aktif { background: #ffb300; color: white; }
-        .toplam-alan { border-top: 2px solid #e2d9cd; padding-top: 8px; text-align: right; font-size: 22px; font-weight: 800; color: #2cb67d; }
-        .eski-fiyat { text-decoration: line-through; color: #999; font-size: 16px; margin-right: 8px; }
+        
+        .bolme-btn { flex: 1; border: 1px solid #0288d1; background: white; color: #0288d1; padding: 5px 2px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; text-align: center; }
+        .bolme-btn.aktif { background: #0288d1; color: white; }
+
+        .toplam-alan { border-top: 2px solid #e2d9cd; padding-top: 8px; text-align: right; font-size: 20px; font-weight: 800; color: #2cb67d; }
+        .kisi-basi-bilgi { font-size: 13px; color: #0288d1; font-weight: bold; margin-top: 2px; }
+        .eski-fiyat { text-decoration: line-through; color: #999; font-size: 15px; margin-right: 8px; }
         .odemeAlindi { width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 12px; background: #2cb67d; color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(44, 182, 125, 0.3); transition: 0.2s; }
         .odemeAlindi:hover { background: #249a68; }
         .odeme-secenekleri { display: flex; gap: 15px; margin-top: 20px; }
@@ -229,19 +246,27 @@
                 <div class="siparisListesi" id="siparisListesi">Henüz ürün eklenmedi.</div>
                 
                 <div class="iskonto-alan">
-                    <div class="iskonto-baslik">🏷️ İSKONTO / İKRAM UYGULA</div>
-                    <div class="iskonto-butonlar">
+                    <div class="iskonto-baslik">
+                        <span>🏷️ İSKONTO ORANI</span>
+                        <span>👥 HESABI BÖL</span>
+                    </div>
+                    <div class="iskonto-satir">
                         <button class="iskonto-btn" id="ikramBtn0" onclick="iskontoUygula(0)">Temizle</button>
                         <button class="iskonto-btn" id="ikramBtn10" onclick="iskontoUygula(10)">%10</button>
                         <button class="iskonto-btn" id="ikramBtn20" onclick="iskontoUygula(20)">%20</button>
                         <button class="iskonto-btn" id="ikramBtn50" onclick="iskontoUygula(50)">%50</button>
-                        <button class="iskonto-btn" id="ikramBtn100" onclick="iskontoUygula(100)">İkram (%100)</button>
+                        <span style="border-right:1px solid #ffcc80; margin:0 2px;"></span>
+                        <button class="bolme-btn" id="bolmeBtn1" onclick="hesapBol(1)">Tek</button>
+                        <button class="bolme-btn" id="bolmeBtn2" onclick="hesapBol(2)">÷2</button>
+                        <button class="bolme-btn" id="bolmeBtn3" onclick="hesapBol(3)">÷3</button>
+                        <button class="bolme-btn" id="bolmeBtn4" onclick="hesapBol(4)">÷4</button>
                     </div>
                 </div>
 
                 <div class="toplam-alan">
                     <span id="eskiFiyat" class="eski-fiyat" style="display:none;">0 ₺</span>
                     Toplam: <span id="toplam">0</span> ₺
+                    <div id="kisiBasiBilgi" class="kisi-basi-bilgi" style="display:none;"></div>
                 </div>
 
                 <button class="odemeAlindi" onclick="odemeAlTetikle()">✓ ÖDEME AL</button>
@@ -337,7 +362,8 @@
     let bugunUrunSatis = {};
     let bugunPaketSatis = { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
     let gecmisGunler = [];
-    let aktifIskontoOrani = 0;
+    let aktifIskontoOrani = 0; // Her masa değişiminde sıfırlanır
+    let aktifBolmeSayisi = 1;
 
     const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2','p3'];
 
@@ -407,7 +433,10 @@
     function masaAc(masaNo) {
         seciliMasa = masaNo.toString();
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
-        aktifIskontoOrani = 0;
+        
+        // 1. İSTEK: İskonto ve Bölme her masa açılışında tek seferlik olduğu için sıfırlanır
+        iskontoUygula(0);
+        hesapBol(1);
 
         let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
         document.getElementById("masaBaslik").innerText = gosterilecekIsim;
@@ -434,12 +463,14 @@
     function urunEkle(urunAdi, fiyat) {
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         let siparis = masalar[seciliMasa];
-        let mevcutUrun = siparis.find(urun => urun.ad === urunAdi);
+        
+        // İkram edilmemiş aynı ürünü bul
+        let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
 
         if (mevcutUrun) {
             mevcutUrun.adet++;
         } else {
-            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1 });
+            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false });
         }
         masalariKaydet();
     }
@@ -453,12 +484,34 @@
         masalariKaydet();
     }
 
+    // 4. İSTEK: Ürün bazlı İkram Seçeneği
+    function urunIkramToggle(index) {
+        let siparis = masalar[seciliMasa];
+        if (!siparis || !siparis[index]) return;
+
+        siparis[index].ikramMi = !siparis[index].ikramMi;
+        masalariKaydet();
+    }
+
     function iskontoUygula(yuzde) {
         aktifIskontoOrani = yuzde;
-        [0, 10, 20, 50, 100].forEach(val => {
+        [0, 10, 20, 50].forEach(val => {
             let btn = document.getElementById("ikramBtn" + val);
             if (btn) {
                 if (val === yuzde) btn.classList.add("aktif");
+                else btn.classList.remove("aktif");
+            }
+        });
+        siparisiGoster();
+    }
+
+    // 2. İSTEK: Hesabı Bölme
+    function hesapBol(kisiSayisi) {
+        aktifBolmeSayisi = kisiSayisi;
+        [1, 2, 3, 4].forEach(val => {
+            let btn = document.getElementById("bolmeBtn" + val);
+            if (btn) {
+                if (val === kisiSayisi) btn.classList.add("aktif");
                 else btn.classList.remove("aktif");
             }
         });
@@ -473,6 +526,7 @@
             liste.innerHTML = "Henüz ürün eklenmedi.";
             document.getElementById("toplam").innerText = "0";
             document.getElementById("eskiFiyat").style.display = "none";
+            document.getElementById("kisiBasiBilgi").style.display = "none";
             return;
         }
 
@@ -480,19 +534,29 @@
         let hamToplam = 0;
 
         siparis.forEach((urun, index) => {
-            let araToplam = urun.fiyat * urun.adet;
+            let urunFiyati = urun.ikramMi ? 0 : urun.fiyat;
+            let araToplam = urunFiyati * urun.adet;
             hamToplam += araToplam;
+
+            let urunMetni = urun.ikramMi 
+                ? `<span class="ikram-urunu">${urun.ad}</span> <span class="ikram-rozeti">[İKRAM]</span>` 
+                : `<strong>${urun.ad}</strong>`;
+
+            let fiyatMetni = urun.ikramMi 
+                ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺` 
+                : `${urun.fiyat} ₺`;
 
             html += `
                 <div class="siparisSatiri">
                     <div>
-                        <strong>${urun.ad}</strong><br>
-                        ${urun.fiyat} ₺ × ${urun.adet}
+                        ${urunMetni}<br>
+                        ${fiyatMetni} × ${urun.adet}
                     </div>
                     <div class="adetButonlari">
+                        <button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>
                         <button onclick="adetDegistir(${index},-1)">-</button>
                         <button onclick="adetDegistir(${index},1)">+</button>
-                        ${araToplam} ₺
+                        <span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>
                     </div>
                 </div>
             `;
@@ -508,7 +572,17 @@
             document.getElementById("eskiFiyat").style.display = "none";
         }
 
-        document.getElementById("toplam").innerText = indirimliToplam;
+        document.getElementById("toplam").innerText = indirimliToplam.toFixed(0);
+
+        // Hesap Bölme Bilgisi
+        let kisiBasiAlan = document.getElementById("kisiBasiBilgi");
+        if (aktifBolmeSayisi > 1) {
+            let kisiBasiTutar = (indirimliToplam / aktifBolmeSayisi).toFixed(2);
+            kisiBasiAlan.innerText = `👥 ${aktifBolmeSayisi} Kişi Başı: ${kisiBasiTutar} ₺`;
+            kisiBasiAlan.style.display = "block";
+        } else {
+            kisiBasiAlan.style.display = "none";
+        }
     }
 
     function tumMasaDurumlariniGuncelle() {
@@ -524,7 +598,7 @@
 
             if (durum) {
                 if (siparis.length > 0) {
-                    let toplam = siparis.reduce((sum, urun) => sum + (urun.fiyat * urun.adet), 0);
+                    let toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
                     durum.innerText = toplam + " ₺";
                     durum.className = "durum-rozeti dolu";
                     if (masaKart) {
@@ -585,7 +659,6 @@
             return;
         }
 
-        // Eğer Paket 1, 2 veya 3 ise Kart-Nakit sormadan direkt kapat
         if (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3') {
             hesapKapat('Paket Servis');
         } else {
@@ -595,17 +668,19 @@
 
     function hesapKapat(odemeYontemi) {
         let siparis = masalar[seciliMasa];
-        let hamToplam = siparis.reduce((sum, urun) => sum + (urun.fiyat * urun.adet), 0);
+        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
         let odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
 
         siparis.forEach(urun => {
-            if (!bugunUrunSatis[urun.ad]) {
-                bugunUrunSatis[urun.ad] = { adet: 0, fiyat: urun.fiyat };
+            let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
+            let netFiyat = urun.ikramMi ? 0 : urun.fiyat;
+            
+            if (!bugunUrunSatis[urunAdi]) {
+                bugunUrunSatis[urunAdi] = { adet: 0, fiyat: netFiyat };
             }
-            bugunUrunSatis[urun.ad].adet += urun.adet;
+            bugunUrunSatis[urunAdi].adet += urun.adet;
         });
 
-        // Paket sipariş takibi
         if (seciliMasa === 'p1') bugunPaketSatis["Paket 1"] = (bugunPaketSatis["Paket 1"] || 0) + odenecekTutar;
         if (seciliMasa === 'p2') bugunPaketSatis["Paket 2"] = (bugunPaketSatis["Paket 2"] || 0) + odenecekTutar;
         if (seciliMasa === 'p3') bugunPaketSatis["Paket 3"] = (bugunPaketSatis["Paket 3"] || 0) + odenecekTutar;
@@ -617,7 +692,7 @@
 
         bugunVerileriniKaydet();
 
-        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar} ₺`);
+        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar.toFixed(0)} ₺`);
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
@@ -630,8 +705,8 @@
     }
 
     function bugunCirosunuGuncelle() {
-        document.getElementById("bugunCiro").innerText = bugunToplamCiro;
-        document.getElementById("bugunOdemeKanalVal").innerText = `${bugunNakitCiro} ₺ Nakit / ${bugunKartCiro} ₺ Kart`;
+        document.getElementById("bugunCiro").innerText = bugunToplamCiro.toFixed(0);
+        document.getElementById("bugunOdemeKanalVal").innerText = `${bugunNakitCiro.toFixed(0)} ₺ Nakit / ${bugunKartCiro.toFixed(0)} ₺ Kart`;
         analizleriGuncelle();
     }
 
@@ -649,7 +724,7 @@
                 }
             }
         });
-        document.getElementById("aylikCiroVal").innerText = aylikToplam + " ₺";
+        document.getElementById("aylikCiroVal").innerText = aylikToplam.toFixed(0) + " ₺";
 
         let tumUrunler = { ...bugunUrunSatis };
         gecmisGunler.forEach(gun => {
