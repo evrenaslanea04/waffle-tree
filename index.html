@@ -35,7 +35,6 @@
         .masa.paket-kart { background: #f4fbf7; border-color: #c8e6c9; }
         .masa.paket-kart h2 { color: #2e7d32; }
 
-        /* DOLU MASA YENİ BELİRGİN RENK TASARIMI */
         .masa.is-dolu { background: #ffebee !important; border: 2px solid #ef5350 !important; box-shadow: 0 6px 15px rgba(229, 57, 53, 0.2) !important; }
         .masa.is-dolu h2 { color: #c62828 !important; }
         .masa.is-dolu::before { background: #d32f2f !important; }
@@ -71,11 +70,24 @@
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
         
         .ikram-urunu { text-decoration: line-through; color: #999; }
-        .ikram-rozeti { background: #e63946; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; text-decoration: none !important; display: inline-block; }
+        /* GENİŞLETİLMİŞ VE KESİLMEYEN İKRAM ROZETİ */
+        .ikram-rozeti { 
+            background: #e63946; 
+            color: white; 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            margin-left: 6px; 
+            text-decoration: none !important; 
+            display: inline-block; 
+            white-space: nowrap; 
+            letter-spacing: 0.5px;
+        }
         
         .adetButonlari { display: flex; align-items: center; gap: 3px; }
         .adetButonlari button { border: none; background: #ff8c00; color: white; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .ikram-btn-mini { background: #ff9800 !important; color: white !important; border: none; padding: 0 6px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .ikram-btn-mini { background: #ff9800 !important; color: white !important; border: none; padding: 0 8px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .ikram-btn-mini.aktif-ikram { background: #e63946 !important; }
 
         .iskonto-alan { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
@@ -362,7 +374,7 @@
     let bugunUrunSatis = {};
     let bugunPaketSatis = { "Paket 1": 0, "Paket 2": 0, "Paket 3": 0 };
     let gecmisGunler = [];
-    let aktifIskontoOrani = 0; // Her masa değişiminde sıfırlanır
+    let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
 
     const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2','p3'];
@@ -434,7 +446,6 @@
         seciliMasa = masaNo.toString();
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         
-        // 1. İSTEK: İskonto ve Bölme her masa açılışında tek seferlik olduğu için sıfırlanır
         iskontoUygula(0);
         hesapBol(1);
 
@@ -464,7 +475,6 @@
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         let siparis = masalar[seciliMasa];
         
-        // İkram edilmemiş aynı ürünü bul
         let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
 
         if (mevcutUrun) {
@@ -484,7 +494,6 @@
         masalariKaydet();
     }
 
-    // 4. İSTEK: Ürün bazlı İkram Seçeneği
     function urunIkramToggle(index) {
         let siparis = masalar[seciliMasa];
         if (!siparis || !siparis[index]) return;
@@ -505,7 +514,6 @@
         siparisiGoster();
     }
 
-    // 2. İSTEK: Hesabı Bölme
     function hesapBol(kisiSayisi) {
         aktifBolmeSayisi = kisiSayisi;
         [1, 2, 3, 4].forEach(val => {
@@ -574,7 +582,6 @@
 
         document.getElementById("toplam").innerText = indirimliToplam.toFixed(0);
 
-        // Hesap Bölme Bilgisi
         let kisiBasiAlan = document.getElementById("kisiBasiBilgi");
         if (aktifBolmeSayisi > 1) {
             let kisiBasiTutar = (indirimliToplam / aktifBolmeSayisi).toFixed(2);
