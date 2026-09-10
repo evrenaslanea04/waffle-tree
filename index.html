@@ -20,20 +20,29 @@
         .bugun-ciro-miktar { font-size: 20px; font-weight: 800; }
         .bugun-detay-btn { background: #ffffff; color: #ff8c00; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .bugun-detay-btn:hover { background: #fff3e0; }
-        .masalar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; padding: 35px 40px; max-width: 1300px; margin: 0 auto; }
-        .masa { background: #ffffff; border-radius: 18px; padding: 22px 15px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f0e6d8; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+        
+        .ana-konteyner { max-width: 1300px; margin: 0 auto; padding: 25px 30px; }
+        .bolum-baslik { font-size: 20px; font-weight: 800; color: #ff8c00; margin: 10px 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #ffe0b2; padding-bottom: 8px; }
+        
+        .masalar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px; }
+        .paketler { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        
+        .masa { background: #ffffff; border-radius: 18px; padding: 20px 15px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f0e6d8; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
         .masa::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e0e0e0; transition: background 0.3s; }
-        .masa:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(255, 140, 0, 0.15); border-color: #ffe0b2; }
-        .masa h2 { margin: 5px 0 10px 0; font-size: 20px; color: #444; font-weight: 700; word-break: break-word; }
+        .masa:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(255, 140, 0, 0.15); border-color: #ffe0b2; }
+        .masa h2 { margin: 5px 0 10px 0; font-size: 19px; color: #444; font-weight: 700; word-break: break-word; }
+        
+        /* Paket Servis Özel Tasarımı */
+        .masa.paket-kart { background: #f4fbf7; border-color: #c8e6c9; }
+        .masa.paket-kart h2 { color: #2e7d32; }
+
         .durum-rozeti { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
         .masa.is-bos::before { background: #2cb67d; }
         .bos { background: #e8f8f0; color: #2cb67d; }
         .masa.is-dolu::before { background: #e63946; }
         .dolu { background: #fde8ea; color: #e63946; font-size: 16px; }
         
-        /* Modal Katmanı En Üste Alındı (z-index: 2000) */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
-        
         .siparisKutusu { background: white; width: 1100px; max-width: 100%; height: 85vh; border-radius: 24px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .detayKutusu { background: white; width: 500px; max-width: 100%; max-height: 80vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .ust { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f2ebe1; padding-bottom: 12px; margin-bottom: 18px; }
@@ -104,7 +113,8 @@
         @media (max-width: 900px) {
             .ekran-govde { flex-direction: column; }
             .urun-bolumu { flex: 1; }
-            .masalar { grid-template-columns: repeat(2, 1fr); padding: 20px; }
+            .masalar { grid-template-columns: repeat(2, 1fr); }
+            .paketler { grid-template-columns: repeat(1, 1fr); }
             .bugun-ciro-kutusu { position: static; margin-top: 10px; display: inline-flex; }
         }
     </style>
@@ -123,19 +133,29 @@
     </div>
 </header>
 
-<div class="masalar">
-    <div class="masa" id="masaKart1" onclick="masaAc(1)"><h2 id="masaBaslikKart1">Masa 1</h2><div id="durum1" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart2" onclick="masaAc(2)"><h2 id="masaBaslikKart2">Masa 2</h2><div id="durum2" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart3" onclick="masaAc(3)"><h2 id="masaBaslikKart3">Masa 3</h2><div id="durum3" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart4" onclick="masaAc(4)"><h2 id="masaBaslikKart4">Masa 4</h2><div id="durum4" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart5" onclick="masaAc(5)"><h2 id="masaBaslikKart5">Masa 5</h2><div id="durum5" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart6" onclick="masaAc(6)"><h2 id="masaBaslikKart6">Masa 6</h2><div id="durum6" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart7" onclick="masaAc(7)"><h2 id="masaBaslikKart7">Masa 7</h2><div id="durum7" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart8" onclick="masaAc(8)"><h2 id="masaBaslikKart8">Masa 8</h2><div id="durum8" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart9" onclick="masaAc(9)"><h2 id="masaBaslikKart9">Masa 9</h2><div id="durum9" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart10" onclick="masaAc(10)"><h2 id="masaBaslikKart10">Masa 10</h2><div id="durum10" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart11" onclick="masaAc(11)"><h2 id="masaBaslikKart11">Masa 11</h2><div id="durum11" class="durum-rozeti bos">Müsait</div></div>
-    <div class="masa" id="masaKart12" onclick="masaAc(12)"><h2 id="masaBaslikKart12">Masa 12</h2><div id="durum12" class="durum-rozeti bos">Müsait</div></div>
+<div class="ana-konteyner">
+    <div class="bolum-baslik">🪑 Masalar</div>
+    <div class="masalar">
+        <div class="masa" id="masaKart1" onclick="masaAc('1')"><h2 id="masaBaslikKart1">Masa 1</h2><div id="durum1" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart2" onclick="masaAc('2')"><h2 id="masaBaslikKart2">Masa 2</h2><div id="durum2" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart3" onclick="masaAc('3')"><h2 id="masaBaslikKart3">Masa 3</h2><div id="durum3" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart4" onclick="masaAc('4')"><h2 id="masaBaslikKart4">Masa 4</h2><div id="durum4" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart5" onclick="masaAc('5')"><h2 id="masaBaslikKart5">Masa 5</h2><div id="durum5" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart6" onclick="masaAc('6')"><h2 id="masaBaslikKart6">Masa 6</h2><div id="durum6" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart7" onclick="masaAc('7')"><h2 id="masaBaslikKart7">Masa 7</h2><div id="durum7" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart8" onclick="masaAc('8')"><h2 id="masaBaslikKart8">Masa 8</h2><div id="durum8" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart9" onclick="masaAc('9')"><h2 id="masaBaslikKart9">Masa 9</h2><div id="durum9" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart10" onclick="masaAc('10')"><h2 id="masaBaslikKart10">Masa 10</h2><div id="durum10" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart11" onclick="masaAc('11')"><h2 id="masaBaslikKart11">Masa 11</h2><div id="durum11" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart12" onclick="masaAc('12')"><h2 id="masaBaslikKart12">Masa 12</h2><div id="durum12" class="durum-rozeti bos">Müsait</div></div>
+    </div>
+
+    <div class="bolum-baslik">🛵 Kurye & Online Paket Siparişler</div>
+    <div class="paketler">
+        <div class="masa paket-kart" id="masaKartp1" onclick="masaAc('p1')"><h2 id="masaBaslikKartp1">Paket 1</h2><div id="durump1" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa paket-kart" id="masaKartp2" onclick="masaAc('p2')"><h2 id="masaBaslikKartp2">Paket 2</h2><div id="durump2" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa paket-kart" id="masaKartp3" onclick="masaAc('p3')"><h2 id="masaBaslikKartp3">Paket 3</h2><div id="durump3" class="durum-rozeti bos">Müsait</div></div>
+    </div>
 </div>
 
 <div id="siparisEkrani" class="modal-overlay">
@@ -317,6 +337,16 @@
     let gecmisGunler = [];
     let aktifIskontoOrani = 0;
 
+    const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2','p3'];
+
+    // Varsayılan Etiket Adı Getirici
+    function varsayilanIsimGetir(key) {
+        if (key === 'p1') return "Paket 1";
+        if (key === 'p2') return "Paket 2";
+        if (key === 'p3') return "Paket 3";
+        return "Masa " + key;
+    }
+
     // Firebase Canlı Dinleme
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
         masalar = doc.exists ? (doc.data() || {}) : {};
@@ -328,7 +358,7 @@
         masaIsimleri = doc.exists ? (doc.data() || {}) : {};
         tumMasaDurumlariniGuncelle();
         if (seciliMasa) {
-            let gosterilecekIsim = masaIsimleri[seciliMasa] || ("Masa " + seciliMasa);
+            let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
             document.getElementById("masaBaslik").innerText = gosterilecekIsim;
         }
     });
@@ -371,22 +401,22 @@
     function gecmisPaneliToggle() { document.getElementById("gecmisPanel").classList.toggle("acik"); }
 
     function masaAc(masaNo) {
-        seciliMasa = masaNo;
-        if (!masalar[masaNo]) masalar[masaNo] = [];
+        seciliMasa = masaNo.toString();
+        if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         aktifIskontoOrani = 0;
 
-        let gosterilecekIsim = masaIsimleri[seciliMasa] || ("Masa " + seciliMasa);
+        let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
         document.getElementById("masaBaslik").innerText = gosterilecekIsim;
         document.getElementById("siparisEkrani").style.display = "flex";
         siparisiGoster();
     }
 
     function masaIsmiDegistir() {
-        let mevcutIsim = masaIsimleri[seciliMasa] || ("Masa " + seciliMasa);
-        let yeniIsim = prompt(`Masa ${seciliMasa} için geçici bir isim girin:`, mevcutIsim);
+        let mevcutIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
+        let yeniIsim = prompt(`${varsayilanIsimGetir(seciliMasa)} için yeni bir isim veya Müşteri Adı girin:`, mevcutIsim);
 
         if (yeniIsim !== null) {
-            if (yeniIsim.trim() === "" || yeniIsim.trim() === ("Masa " + seciliMasa)) {
+            if (yeniIsim.trim() === "" || yeniIsim.trim() === varsayilanIsimGetir(seciliMasa)) {
                 delete masaIsimleri[seciliMasa];
             } else {
                 masaIsimleri[seciliMasa] = yeniIsim.trim();
@@ -478,14 +508,14 @@
     }
 
     function tumMasaDurumlariniGuncelle() {
-        for (let masaNo = 1; masaNo <= 12; masaNo++) {
-            let siparis = masalar[masaNo] || [];
-            let durum = document.getElementById("durum" + masaNo);
-            let masaKart = document.getElementById("masaKart" + masaNo);
-            let baslikKart = document.getElementById("masaBaslikKart" + masaNo);
+        tumAlanIDleri.forEach(key => {
+            let siparis = masalar[key] || [];
+            let durum = document.getElementById("durum" + key);
+            let masaKart = document.getElementById("masaKart" + key);
+            let baslikKart = document.getElementById("masaBaslikKart" + key);
 
             if (baslikKart) {
-                baslikKart.innerText = masaIsimleri[masaNo] || ("Masa " + masaNo);
+                baslikKart.innerText = masaIsimleri[key] || varsayilanIsimGetir(key);
             }
 
             if (durum) {
@@ -506,7 +536,7 @@
                     }
                 }
             }
-        }
+        });
     }
 
     function masaTasiModalAc() {
@@ -515,17 +545,17 @@
             return;
         }
 
-        let hedefMasa = prompt(`Masa ${seciliMasa} siparişlerini hangi masaya aktarmak istiyorsunuz? (1-12):`);
+        let hedefMasa = prompt(`${varsayilanIsimGetir(seciliMasa)} siparişlerini nereye aktarmak istiyorsunuz? (Örn Masa için: 1-12 | Paket için: p1, p2, p3):`);
         if (!hedefMasa) return;
-        hedefMasa = parseInt(hedefMasa);
+        hedefMasa = hedefMasa.trim().toLowerCase();
 
-        if (isNaN(hedefMasa) || hedefMasa < 1 || hedefMasa > 12) {
-            alert("Geçersiz masa numarası!");
+        if (!tumAlanIDleri.includes(hedefMasa)) {
+            alert("Geçersiz hedef! Lütfen 1-12 arasında bir masa veya p1, p2, p3 yazın.");
             return;
         }
 
         if (hedefMasa === seciliMasa) {
-            alert("Siparişi aynı masaya taşıyamazsınız.");
+            alert("Siparişi aynı yere taşıyamazsınız.");
             return;
         }
 
@@ -542,7 +572,7 @@
 
         masalariKaydet();
         ekraniKapat('siparisEkrani');
-        alert(`Siparişler başarıyla Masa ${hedefMasa}'e taşındı.`);
+        alert(`Siparişler başarıyla ${varsayilanIsimGetir(hedefMasa)} alanına taşındı.`);
     }
 
     function odemeSecimModalAc() {
@@ -572,7 +602,7 @@
 
         bugunVerileriniKaydet();
 
-        alert(`${masaIsimleri[seciliMasa] || ("Masa " + seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar} ₺ (${odemeYontemi})`);
+        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar} ₺ (${odemeYontemi})`);
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
@@ -658,70 +688,66 @@
         analizleriGuncelle();
     }
 
-   function gunuBitir() {
-    if (bugunToplamCiro === 0) {
-        alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
-        return;
-    }
+    function gunuBitir() {
+        if (bugunToplamCiro === 0) {
+            alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
+            return;
+        }
 
-    let bugunTarih = new Date().toLocaleDateString('tr-TR');
+        let bugunTarih = new Date().toLocaleDateString('tr-TR');
 
-    if (confirm(`Bugünü (${bugunTarih}) aktarmak ve ${bugunToplamCiro} ₺ ciroyu geçmişe eklemek istiyor musunuz?`)) {
-        
-        // Önce aynı tarihte kayıt var mı kontrol et
-        let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
+        if (confirm(`Bugünü (${bugunTarih}) aktarmak ve ${bugunToplamCiro} ₺ ciroyu geçmişe eklemek istiyor musunuz?`)) {
+            
+            let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
 
-        if (mevcutGun) {
-            // Var olan kaydın üzerine ekleme yap
-            let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
-            let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
-            let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
-            let yeniUrunler = { ...(mevcutGun.urunler || {}) };
+            if (mevcutGun) {
+                let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
+                let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
+                let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
+                let yeniUrunler = { ...(mevcutGun.urunler || {}) };
 
-            // Ürün adetlerini birleştir
-            for (let urunAdi in bugunUrunSatis) {
-                if (!yeniUrunler[urunAdi]) {
-                    yeniUrunler[urunAdi] = { ...bugunUrunSatis[urunAdi] };
-                } else {
-                    yeniUrunler[urunAdi].adet += bugunUrunSatis[urunAdi].adet;
+                for (let urunAdi in bugunUrunSatis) {
+                    if (!yeniUrunler[urunAdi]) {
+                        yeniUrunler[urunAdi] = { ...bugunUrunSatis[urunAdi] };
+                    } else {
+                        yeniUrunler[urunAdi].adet += bugunUrunSatis[urunAdi].adet;
+                    }
                 }
+
+                db.collection("gecmis").doc(mevcutGun.id).update({
+                    ciro: yeniCiro,
+                    nakit: yeniNakit,
+                    kart: yeniKart,
+                    urunler: yeniUrunler
+                }).then(() => {
+                    sifirlaVeKaydet();
+                    alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
+                });
+
+            } else {
+                let tarihIso = new Date().toISOString();
+                db.collection("gecmis").add({
+                    tarih: bugunTarih,
+                    tarihIso: tarihIso,
+                    ciro: bugunToplamCiro,
+                    nakit: bugunNakitCiro,
+                    kart: bugunKartCiro,
+                    urunler: JSON.parse(JSON.stringify(bugunUrunSatis))
+                }).then(() => {
+                    sifirlaVeKaydet();
+                    alert("Gün başarıyla aktarıldı!");
+                });
             }
-
-            db.collection("gecmis").doc(mevcutGun.id).update({
-                ciro: yeniCiro,
-                nakit: yeniNakit,
-                kart: yeniKart,
-                urunler: yeniUrunler
-            }).then(() => {
-                sifirlaVeKaydet();
-                alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
-            });
-
-        } else {
-            // Yoksa sıfırdan yeni gün kaydı aç
-            let tarihIso = new Date().toISOString();
-            db.collection("gecmis").add({
-                tarih: bugunTarih,
-                tarihIso: tarihIso,
-                ciro: bugunToplamCiro,
-                nakit: bugunNakitCiro,
-                kart: bugunKartCiro,
-                urunler: JSON.parse(JSON.stringify(bugunUrunSatis))
-            }).then(() => {
-                sifirlaVeKaydet();
-                alert("Gün başarıyla aktarıldı!");
-            });
         }
     }
-}
 
-function sifirlaVeKaydet() {
-    bugunToplamCiro = 0;
-    bugunNakitCiro = 0;
-    bugunKartCiro = 0;
-    bugunUrunSatis = {};
-    bugunVerileriniKaydet();
-}
+    function sifirlaVeKaydet() {
+        bugunToplamCiro = 0;
+        bugunNakitCiro = 0;
+        bugunKartCiro = 0;
+        bugunUrunSatis = {};
+        bugunVerileriniKaydet();
+    }
 
     function gunuGeriYukleDoc(docId) {
         let silinecekGun = gecmisGunler.find(g => g.id === docId);
