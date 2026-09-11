@@ -383,8 +383,8 @@
     <div class="gecmis-icerik">
         <div class="istatistik-kartlari">
             <div class="ist-kart">
-                <div class="ist-baslik">📅 Bu Ay Toplam (Masa + Paket)</div>
-                <div class="ist-deger" id="aylikCiroVal">0 ₺</div>
+                <div class="ist-baslik">📅 Bu Ay Toplam</div>
+                <div class="ist-deger" id="aylikCiroVal" style="font-size: 14px;">Masa: 0 ₺ | Paket: 0 ₺</div>
             </div>
             <div class="ist-kart">
                 <div class="ist-baslik">🏆 En Çok Satan Ürün</div>
@@ -779,21 +779,25 @@
         analizleriGuncelle();
     }
 
-    function analizleriGuncelle() {
+   function analizleriGuncelle() {
         let buAy = new Date().getMonth();
         let buYil = new Date().getFullYear();
-        let aylikToplam = bugunToplamCiro + bugunPaketToplamCiro;
+        
+        let aylikMasaToplam = bugunToplamCiro;
+        let aylikPaketToplam = bugunPaketToplamCiro;
 
         gecmisGunler.forEach(gun => {
             let parts = gun.tarih ? gun.tarih.split('.') : [];
             if (parts.length === 3) {
                 let gunTarihi = new Date(parts[2], parts[1] - 1, parts[0]);
                 if (gunTarihi.getMonth() === buAy && gunTarihi.getFullYear() === buYil) {
-                    aylikToplam += (gun.ciro || 0) + (gun.paketCiro || 0);
+                    aylikMasaToplam += (gun.ciro || 0);
+                    aylikPaketToplam += (gun.paketCiro || 0);
                 }
             }
         });
-        document.getElementById("aylikCiroVal").innerText = aylikToplam.toFixed(0) + " ₺";
+        
+        document.getElementById("aylikCiroVal").innerText = `Masa: ${aylikMasaToplam.toFixed(0)} ₺ | Paket: ${aylikPaketToplam.toFixed(0)} ₺`;
 
         let tumUrunler = { ...bugunUrunSatis, ...bugunPaketUrunSatis };
         gecmisGunler.forEach(gun => {
