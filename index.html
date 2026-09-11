@@ -181,13 +181,43 @@
         .gunu-bitir-btn { background: #e53e3e; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; }
         .gunu-bitir-btn:hover { background: #c53030; }
         
-        @media (max-width: 900px) {
+        @@media (max-width: 900px) {
             header { flex-direction: column; gap: 10px; }
             .header-ciro-alani { width: 100%; justify-content: center; }
-            .ekran-govde { flex-direction: column; }
-            .urun-bolumu { flex: 1; }
             .masalar { grid-template-columns: repeat(2, 1fr); }
             .paketler { grid-template-columns: repeat(1, 1fr); }
+
+            /* Telefon Sipariş Ekranı Düzenlemeleri */
+            .siparisKutusu { 
+                height: 92vh; 
+                padding: 15px; 
+            }
+            .ekran-govde { 
+                flex-direction: column; 
+                overflow-y: auto; 
+                gap: 15px; 
+            }
+            .urun-bolumu { 
+                flex: none; 
+                max-height: 45vh; 
+                overflow-y: auto; 
+                border-bottom: 2px solid #e2e8f0; 
+                padding-bottom: 10px; 
+                padding-right: 5px; 
+            }
+            .urunler { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .sepet-bolumu { 
+                flex: none; 
+                max-height: 45vh; 
+                display: flex; 
+                flex-direction: column; 
+            }
+            .siparisListesi { 
+                max-height: 150px; 
+                overflow-y: auto; 
+            }
         }
     </style>
 </head>
