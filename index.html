@@ -27,7 +27,7 @@
         }
         .cihaz-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); }
 
-        /* Modern Antrasit / Gri Header */
+        /* Header */
         header { 
             background: #1e2025; color: white; padding: 15px 25px; position: relative; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
@@ -76,7 +76,7 @@
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
         .siparisKutusu { background: white; width: 1100px; max-width: 100%; height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .detayKutusu { background: white; width: 600px; max-width: 100%; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .detayKutusu { background: white; width: 750px; max-width: 100%; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .ust { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 12px; margin-bottom: 18px; }
         .ust h2 { margin: 0; color: #1e2025; font-size: 22px; font-weight: 800; }
         .ust-butonlar { display: flex; gap: 10px; }
@@ -95,7 +95,6 @@
         .urun:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
         .urun strong { display: block; margin-bottom: 5px; color: #1a202c; }
         
-        /* Ürün Adet Rozeti */
         .urun-adet-badge { position: absolute; top: -8px; right: -8px; background: #e53e3e; color: white; font-weight: bold; font-size: 12px; padding: 3px 8px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .sepet-bolumu { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; }
@@ -434,7 +433,7 @@
     let bugunKartCiro = 0;
     let bugunUrunSatis = {};
     let bugunPaketUrunSatis = {};
-    let bugunMasaDetaylari = {};
+    let bugunMasaDetaylari = []; // Masa işlem geçmişlerini tutan dizi
     let gecmisGunler = [];
     let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
@@ -488,10 +487,10 @@
             bugunKartCiro = data.kart || 0;
             bugunUrunSatis = data.urunler || {};
             bugunPaketUrunSatis = data.paketUrunler || {};
-            bugunMasaDetaylari = data.masaDetaylari || {};
+            bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
         } else {
             bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-            bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = {};
+            bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = [];
         }
         bugunCirosunuGuncelle();
     });
@@ -816,6 +815,8 @@
         let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3');
         let hedefSatisObjesi = isPaket ? bugunPaketUrunSatis : bugunUrunSatis;
 
+        let masaUrunOzet = [];
+
         siparis.forEach(urun => {
             let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
             let netFiyat = urun.ikramMi ? 0 : urun.fiyat;
@@ -824,7 +825,12 @@
                 hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: netFiyat };
             }
             hedefSatisObjesi[urunAdi].adet += urun.adet;
+
+            masaUrunOzet.push(`${urun.adet}x ${urunAdi}`);
         });
+
+        let simdi = new Date();
+        let saatStr = simdi.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
         if (isPaket) {
             bugunPaketToplamCiro += odenecekTutar;
@@ -834,10 +840,13 @@
             else if (odemeYontemi === 'Kart') bugunKartCiro += odenecekTutar;
 
             let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
-            if (!bugunMasaDetaylari[masaIsmi]) {
-                bugunMasaDetaylari[masaIsmi] = { harcama: 0 };
-            }
-            bugunMasaDetaylari[masaIsmi].harcama += odenecekTutar;
+            
+            bugunMasaDetaylari.push({
+                masaAdi: masaIsmi,
+                harcama: odenecekTutar,
+                saat: saatStr,
+                urunlerDetay: masaUrunOzet.join(", ")
+            });
         }
 
         bugunVerileriniKaydet();
@@ -981,11 +990,7 @@
                     else yeniPaketUrunler[urunAdi].adet += bugunPaketUrunSatis[urunAdi].adet;
                 }
 
-                let yeniMasaDetaylari = { ...(mevcutGun.masaDetaylari || {}) };
-                for (let mName in bugunMasaDetaylari) {
-                    if (!yeniMasaDetaylari[mName]) yeniMasaDetaylari[mName] = { ...bugunMasaDetaylari[mName] };
-                    else yeniMasaDetaylari[mName].harcama += bugunMasaDetaylari[mName].harcama;
-                }
+                let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
 
                 db.collection("gecmis").doc(mevcutGun.id).update({
                     ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
@@ -1012,7 +1017,7 @@
 
     function sifirlaVeKaydet() {
         bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = {};
+        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = [];
         bugunVerileriniKaydet();
     }
 
@@ -1040,11 +1045,8 @@
                 }
             }
 
-            if (silinecekGun.masaDetaylari) {
-                for (let mName in silinecekGun.masaDetaylari) {
-                    if (!bugunMasaDetaylari[mName]) bugunMasaDetaylari[mName] = silinecekGun.masaDetaylari[mName];
-                    else bugunMasaDetaylari[mName].harcama += silinecekGun.masaDetaylari[mName].harcama;
-                }
+            if (Array.isArray(silinecekGun.masaDetaylari)) {
+                bugunMasaDetaylari = [...bugunMasaDetaylari, ...silinecekGun.masaDetaylari];
             }
 
             db.collection("gecmis").doc(docId).delete().then(() => {
@@ -1129,31 +1131,35 @@
         document.getElementById("detayBaslik").innerText = "Bugün Kullanılan Masalar ve İşlemler";
         document.getElementById("detayTabloHead").innerHTML = `
             <th>Masa Adı</th>
+            <th>Masa Detay (İçerik)</th>
+            <th>Saat</th>
             <th style="text-align:right;">Ciro</th>
         `;
         let tbody = document.getElementById("detayTabloBody");
         tbody.innerHTML = "";
 
-        if (!bugunMasaDetaylari || Object.keys(bugunMasaDetaylari).length === 0) {
-            tbody.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888;'>Bugün henüz işlem gören masa bulunmuyor.</td></tr>";
+        if (!bugunMasaDetaylari || bugunMasaDetaylari.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>Bugün henüz işlem gören masa bulunmuyor.</td></tr>";
         } else {
             let genelMasaToplam = 0;
 
-            for (let masaAdi in bugunMasaDetaylari) {
-                let harcama = bugunMasaDetaylari[masaAdi].harcama || 0;
+            bugunMasaDetaylari.forEach(item => {
+                let harcama = item.harcama || 0;
                 genelMasaToplam += harcama;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${masaAdi}</strong></td>
+                        <td><strong>${item.masaAdi || '-'}</strong></td>
+                        <td style="font-size:12px; color:#555;">${item.urunlerDetay || '-'}</td>
+                        <td style="font-size:12px; color:#777;">${item.saat || '-'}</td>
                         <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
                     </tr>
                 `;
-            }
+            });
 
             tbody.innerHTML += `
                 <tr style="background:#e6fffa; color:#234e52; font-weight:800; font-size:15px; border-top:2px solid #319795;">
-                    <td>GENEL MASA TOPLAMI</td>
+                    <td colspan="3">GENEL MASA TOPLAMI</td>
                     <td style="text-align:right;">${genelMasaToplam.toFixed(0)} ₺</td>
                 </tr>
             `;
