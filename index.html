@@ -372,9 +372,9 @@
         <div class="detay-liste-alan" id="detayIcerik">
             <table class="detay-tablo">
                 <thead>
-                    <tr>
-                        <th>Ürün / Masa</th>
-                        <th>Adet / Detay</th>
+                    <tr id="detayTabloHead">
+                        <th>Ürün</th>
+                        <th>Adet</th>
                         <th>Toplam Tutar</th>
                     </tr>
                 </thead>
@@ -506,13 +506,8 @@
     function masaIsimleriniKaydet() { db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri); }
     function bugunVerileriniKaydet() {
         db.collection("pos_data").doc("bugun").set({
-            ciro: bugunToplamCiro, 
-            paketCiro: bugunPaketToplamCiro, 
-            nakit: bugunNakitCiro, 
-            kart: bugunKartCiro,
-            urunler: bugunUrunSatis, 
-            paketUrunler: bugunPaketUrunSatis,
-            masaDetaylari: bugunMasaDetaylari
+            ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
+            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari
         });
     }
 
@@ -815,8 +810,6 @@
 
     function hesapKapat(odemeYontemi) {
         let siparis = masalar[seciliMasa];
-        if (!siparis || siparis.length === 0) return;
-
         let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
         let odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
 
@@ -833,24 +826,23 @@
             hedefSatisObjesi[urunAdi].adet += urun.adet;
         });
 
-        // Masa detay kaydı
-        let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
-        if (!bugunMasaDetaylari[masaIsmi]) {
-            bugunMasaDetaylari[masaIsmi] = { harcama: 0 };
-        }
-        bugunMasaDetaylari[masaIsmi].harcama += odenecekTutar;
-
         if (isPaket) {
             bugunPaketToplamCiro += odenecekTutar;
         } else {
             bugunToplamCiro += odenecekTutar;
             if (odemeYontemi === 'Nakit') bugunNakitCiro += odenecekTutar;
             else if (odemeYontemi === 'Kart') bugunKartCiro += odenecekTutar;
+
+            let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
+            if (!bugunMasaDetaylari[masaIsmi]) {
+                bugunMasaDetaylari[masaIsmi] = { harcama: 0 };
+            }
+            bugunMasaDetaylari[masaIsmi].harcama += odenecekTutar;
         }
 
         bugunVerileriniKaydet();
 
-        alert(`${masaIsmi} ödemesi alındı.\nTutar: ${odenecekTutar.toFixed(0)} ₺`);
+        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar.toFixed(0)} ₺`);
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
@@ -989,9 +981,15 @@
                     else yeniPaketUrunler[urunAdi].adet += bugunPaketUrunSatis[urunAdi].adet;
                 }
 
+                let yeniMasaDetaylari = { ...(mevcutGun.masaDetaylari || {}) };
+                for (let mName in bugunMasaDetaylari) {
+                    if (!yeniMasaDetaylari[mName]) yeniMasaDetaylari[mName] = { ...bugunMasaDetaylari[mName] };
+                    else yeniMasaDetaylari[mName].harcama += bugunMasaDetaylari[mName].harcama;
+                }
+
                 db.collection("gecmis").doc(mevcutGun.id).update({
                     ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
-                    urunler: yeniUrunler, paketUrunler: yeniPaketUrunler
+                    urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
@@ -1002,7 +1000,8 @@
                 db.collection("gecmis").add({
                     tarih: bugunTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
                     nakit: bugunNakitCiro, kart: bugunKartCiro, urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
-                    paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis))
+                    paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
+                    masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari))
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert("Gün başarıyla aktarıldı!");
@@ -1038,6 +1037,13 @@
                 for (let urunAdi in silinecekGun.paketUrunler) {
                     if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = silinecekGun.paketUrunler[urunAdi];
                     else bugunPaketUrunSatis[urunAdi].adet += silinecekGun.paketUrunler[urunAdi].adet;
+                }
+            }
+
+            if (silinecekGun.masaDetaylari) {
+                for (let mName in silinecekGun.masaDetaylari) {
+                    if (!bugunMasaDetaylari[mName]) bugunMasaDetaylari[mName] = silinecekGun.masaDetaylari[mName];
+                    else bugunMasaDetaylari[mName].harcama += silinecekGun.masaDetaylari[mName].harcama;
                 }
             }
 
@@ -1092,6 +1098,11 @@
 
     function tabloDoldur(baslik, urunler) {
         document.getElementById("detayBaslik").innerText = baslik;
+        document.getElementById("detayTabloHead").innerHTML = `
+            <th>Ürün</th>
+            <th>Adet</th>
+            <th>Toplam Tutar</th>
+        `;
         let tbody = document.getElementById("detayTabloBody");
         tbody.innerHTML = "";
 
@@ -1116,11 +1127,15 @@
 
     function masaBazliDetayGoster() {
         document.getElementById("detayBaslik").innerText = "Bugün Kullanılan Masalar ve İşlemler";
+        document.getElementById("detayTabloHead").innerHTML = `
+            <th>Masa Adı</th>
+            <th style="text-align:right;">Ciro</th>
+        `;
         let tbody = document.getElementById("detayTabloBody");
         tbody.innerHTML = "";
 
         if (!bugunMasaDetaylari || Object.keys(bugunMasaDetaylari).length === 0) {
-            tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:#888;'>Bugün henüz işlem gören masa bulunmuyor.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888;'>Bugün henüz işlem gören masa bulunmuyor.</td></tr>";
         } else {
             let genelMasaToplam = 0;
 
@@ -1131,16 +1146,15 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${masaAdi}</strong></td>
-                        <td>İşlem Alındı</td>
-                        <td>${harcama.toFixed(0)} ₺</td>
+                        <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
                     </tr>
                 `;
             }
 
             tbody.innerHTML += `
                 <tr style="background:#e6fffa; color:#234e52; font-weight:800; font-size:15px; border-top:2px solid #319795;">
-                    <td colspan="2">GENEL MASA TOPLAMI</td>
-                    <td>${genelMasaToplam.toFixed(0)} ₺</td>
+                    <td>GENEL MASA TOPLAMI</td>
+                    <td style="text-align:right;">${genelMasaToplam.toFixed(0)} ₺</td>
                 </tr>
             `;
         }
