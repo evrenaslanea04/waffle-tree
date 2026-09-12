@@ -823,6 +823,19 @@ function varsayilanIsimGetir(key) {
                 hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: netFiyat };
             }
             hedefSatisObjesi[urunAdi].adet += urun.adet;
+            // Masa ödemesi/kapanışı tamamlandığında çalışacak kısım:
+if (!bugunMasaDetaylari) {
+    var bugunMasaDetaylari = {};
+}
+
+// Masa numarasını / adını alıp o masanın tutarını ve ürünlerini kaydediyoruz
+let masaIsmi = varsayilanIsimGetir(aktifMasa);
+if (!bugunMasaDetaylari[masaIsmi]) {
+    bugunMasaDetaylari[masaIsmi] = { harcama: 0, siparisler: [] };
+}
+
+bugunMasaDetaylari[masaIsmi].harcama += masaToplamTutar;
+// Masa kapatıldığında bu veriyi saklıyoruz
         });
 
         if (isPaket) {
@@ -1053,13 +1066,13 @@ function varsayilanIsimGetir(key) {
         }
     }
 
-  function bugunDetayGoster(tip) { 
-        if (tip === 'masa') {
-            tabloDoldurMasaCiro("Bugün Masa Satış Detayı", bugunUrunSatis, bugunToplamCiro);
-        } else {
-            tabloDoldur("Bugün Paket Servis Satış Detayı", bugunPaketUrunSatis);
-        }
+ function bugunDetayGoster(tip) { 
+    if (tip === 'masa') {
+        masaBazliDetayGoster();
+    } else {
+        tabloDoldur("Bugün Paket Servis Satış Detayı", bugunPaketUrunSatis);
     }
+}
 
     function gecmisDetayGosterDoc(docId) {
         let gun = gecmisGunler.find(g => g.id === docId);
@@ -1139,6 +1152,39 @@ function varsayilanIsimGetir(key) {
 
         document.getElementById("detayEkrani").style.display = "flex";
     }
+    function masaBazliDetayGoster() {
+    document.getElementById("detayBaslik").innerText = "Bugün Kullanılan Masalar ve İşlemler";
+    let tbody = document.getElementById("detayTabloBody");
+    tbody.innerHTML = "";
+
+    if (!bugunMasaDetaylari || Object.keys(bugunMasaDetaylari).length === 0) {
+        tbody.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888;'>Bugün henüz işlem gören masa bulunmuyor.</td></tr>";
+    } else {
+        let genelMasaToplam = 0;
+
+        for (let masaAdi in bugunMasaDetaylari) {
+            let harcama = bugunMasaDetaylari[masaAdi].harcama || 0;
+            genelMasaToplam += harcama;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${masaAdi}</strong></td>
+                    <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
+                </tr>
+            `;
+        }
+
+        // Genel Toplam Satırı
+        tbody.innerHTML += `
+            <tr style="background:#e6fffa; color:#234e52; font-weight:800; font-size:15px; border-top:2px solid #319795;">
+                <td>GENEL MASA TOPLAMI</td>
+                <td style="text-align:right;">${genelMasaToplam.toFixed(0)} ₺</td>
+            </tr>
+        `;
+    }
+
+    document.getElementById("detayEkrani").style.display = "flex";
+}
 </script>
 
 </body>
