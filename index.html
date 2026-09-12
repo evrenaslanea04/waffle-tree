@@ -232,7 +232,7 @@
         <div class="masa" id="masaKart9" onclick="masaAc('9')"><h2 id="masaBaslikKart9">Masa 9</h2><div id="durum9" class="durum-rozeti bos">Müsait</div></div>
         <div class="masa" id="masaKart10" onclick="masaAc('10')"><h2 id="masaBaslikKart10">Masa 10</h2><div id="durum10" class="durum-rozeti bos">Müsait</div></div>
         <div class="masa" id="masaKart11" onclick="masaAc('11')"><h2 id="masaBaslikKart11">Masa 11</h2><div id="durum11" class="durum-rozeti bos">Müsait</div></div>
-        <div class="masa" id="masaKart12" onclick="masaAc('12')"><h2 id="masaBaslikKart12">Masa 12</h2><div id="durum12" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa" id="masaKart12" onclick="masaAc('12')"><h2 id="masaBaslikKart12">Take Away Paket</h2><div id="durum12" class="durum-rozeti bos">Müsait</div></div>
     </div>
 
     <div class="bolum-baslik">🛵 Kurye & Online Paket Siparişler</div>
@@ -455,12 +455,13 @@
         }
     }
 
-    function varsayilanIsimGetir(key) {
-        if (key === 'p1') return "Paket 1";
-        if (key === 'p2') return "Paket 2";
-        if (key === 'p3') return "Paket 3";
-        return "Masa " + key;
-    }
+function varsayilanIsimGetir(key) {
+    if (key === '12') return "Take Away Paket";
+    if (key === 'p1') return "Paket 1";
+    if (key === 'p2') return "Paket 2";
+    if (key === 'p3') return "Paket 3";
+    return "Masa " + key;
+}
 
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
         masalar = doc.exists ? (doc.data() || {}) : {};
