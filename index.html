@@ -433,7 +433,7 @@
     let bugunKartCiro = 0;
     let bugunUrunSatis = {};
     let bugunPaketUrunSatis = {};
-    let bugunMasaDetaylari = []; // Masa işlem geçmişlerini tutan dizi
+    let bugunMasaDetaylari = [];
     let gecmisGunler = [];
     let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
@@ -481,10 +481,10 @@
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
         if (doc.exists) {
             let data = doc.data();
-            bugunToplamCiro = data.ciro || 0;
-            bugunPaketToplamCiro = data.paketCiro || 0;
-            bugunNakitCiro = data.nakit || 0;
-            bugunKartCiro = data.kart || 0;
+            bugunToplamCiro = Number(data.ciro) || 0;
+            bugunPaketToplamCiro = Number(data.paketCiro) || 0;
+            bugunNakitCiro = Number(data.nakit) || 0;
+            bugunKartCiro = Number(data.kart) || 0;
             bugunUrunSatis = data.urunler || {};
             bugunPaketUrunSatis = data.paketUrunler || {};
             bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
@@ -505,8 +505,13 @@
     function masaIsimleriniKaydet() { db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri); }
     function bugunVerileriniKaydet() {
         db.collection("pos_data").doc("bugun").set({
-            ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
-            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari
+            ciro: Number(bugunToplamCiro) || 0,
+            paketCiro: Number(bugunPaketToplamCiro) || 0,
+            nakit: Number(bugunNakitCiro) || 0,
+            kart: Number(bugunKartCiro) || 0,
+            urunler: bugunUrunSatis,
+            paketUrunler: bugunPaketUrunSatis,
+            masaDetaylari: bugunMasaDetaylari
         });
     }
 
@@ -593,9 +598,9 @@
         let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
 
         if (mevcutUrun) {
-            mevcutUrun.adet++;
+            mevcutUrun.adet = Number(mevcutUrun.adet) + 1;
         } else {
-            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false });
+            siparis.push({ ad: urunAdi, fiyat: Number(fiyat), adet: 1, ikramMi: false });
         }
         masalariKaydet();
     }
@@ -604,7 +609,7 @@
         let siparis = masalar[seciliMasa];
         if (!siparis) return;
         
-        siparis[index].adet += miktar;
+        siparis[index].adet = Number(siparis[index].adet) + Number(miktar);
         if (siparis[index].adet <= 0) siparis.splice(index, 1);
         masalariKaydet();
     }
@@ -618,7 +623,7 @@
     }
 
     function iskontoUygula(yuzde) {
-        aktifIskontoOrani = yuzde;
+        aktifIskontoOrani = Number(yuzde);
         [0, 10, 20, 50].forEach(val => {
             let btn = document.getElementById("ikramBtn" + val);
             if (btn) {
@@ -630,7 +635,7 @@
     }
 
     function hesapBol(kisiSayisi) {
-        aktifBolmeSayisi = kisiSayisi;
+        aktifBolmeSayisi = Number(kisiSayisi);
         [1, 2, 3, 4].forEach(val => {
             let btn = document.getElementById("bolmeBtn" + val);
             if (btn) {
@@ -651,7 +656,7 @@
             if (varOlanBadge) btn.removeChild(varOlanBadge);
 
             let urunGrup = siparis.filter(u => u.ad === ad);
-            let toplamAdet = urunGrup.reduce((s, u) => s + u.adet, 0);
+            let toplamAdet = urunGrup.reduce((s, u) => s + Number(u.adet), 0);
 
             if (toplamAdet > 0) {
                 let badge = document.createElement('span');
@@ -674,8 +679,8 @@
         let hamToplam = 0;
 
         siparis.forEach((urun, index) => {
-            let urunFiyati = urun.ikramMi ? 0 : urun.fiyat;
-            let araToplam = urunFiyati * urun.adet;
+            let urunFiyati = urun.ikramMi ? 0 : Number(urun.fiyat);
+            let araToplam = urunFiyati * Number(urun.adet);
             hamToplam += araToplam;
 
             let urunMetni = urun.ikramMi 
@@ -739,7 +744,7 @@
 
             if (durum) {
                 if (siparis.length > 0) {
-                    let toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+                    let toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat)) * Number(urun.adet)), 0);
                     durum.innerText = toplam + " ₺";
                     durum.className = "durum-rozeti dolu";
                     if (masaKart) {
@@ -809,7 +814,9 @@
 
     function hesapKapat(odemeYontemi) {
         let siparis = masalar[seciliMasa];
-        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+        if (!siparis || siparis.length === 0) return;
+
+        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat)) * Number(urun.adet)), 0);
         let odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
 
         let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3');
@@ -819,12 +826,12 @@
 
         siparis.forEach(urun => {
             let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
-            let netFiyat = urun.ikramMi ? 0 : urun.fiyat;
+            let netFiyat = urun.ikramMi ? 0 : Number(urun.fiyat);
             
             if (!hedefSatisObjesi[urunAdi]) {
                 hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: netFiyat };
             }
-            hedefSatisObjesi[urunAdi].adet += urun.adet;
+            hedefSatisObjesi[urunAdi].adet = Number(hedefSatisObjesi[urunAdi].adet) + Number(urun.adet);
 
             masaUrunOzet.push(`${urun.adet}x ${urunAdi}`);
         });
@@ -833,11 +840,11 @@
         let saatStr = simdi.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
         if (isPaket) {
-            bugunPaketToplamCiro += odenecekTutar;
+            bugunPaketToplamCiro = Number(bugunPaketToplamCiro) + Number(odenecekTutar);
         } else {
-            bugunToplamCiro += odenecekTutar;
-            if (odemeYontemi === 'Nakit') bugunNakitCiro += odenecekTutar;
-            else if (odemeYontemi === 'Kart') bugunKartCiro += odenecekTutar;
+            bugunToplamCiro = Number(bugunToplamCiro) + Number(odenecekTutar);
+            if (odemeYontemi === 'Nakit') bugunNakitCiro = Number(bugunNakitCiro) + Number(odenecekTutar);
+            else if (odemeYontemi === 'Kart') bugunKartCiro = Number(bugunKartCiro) + Number(odenecekTutar);
 
             let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
             
@@ -872,9 +879,9 @@
     }
 
     function bugunCirosunuGuncelle() {
-        document.getElementById("bugunCiro").innerText = bugunToplamCiro.toFixed(0);
-        document.getElementById("bugunPaketCiro").innerText = bugunPaketToplamCiro.toFixed(0);
-        document.getElementById("bugunOdemeKanalVal").innerText = `${bugunNakitCiro.toFixed(0)} ₺ Nakit / ${bugunKartCiro.toFixed(0)} ₺ Kart`;
+        document.getElementById("bugunCiro").innerText = Number(bugunToplamCiro).toFixed(0);
+        document.getElementById("bugunPaketCiro").innerText = Number(bugunPaketToplamCiro).toFixed(0);
+        document.getElementById("bugunOdemeKanalVal").innerText = `${Number(bugunNakitCiro).toFixed(0)} ₺ Nakit / ${Number(bugunKartCiro).toFixed(0)} ₺ Kart`;
         analizleriGuncelle();
     }
 
@@ -882,16 +889,16 @@
         let buAy = new Date().getMonth();
         let buYil = new Date().getFullYear();
         
-        let aylikMasaToplam = bugunToplamCiro;
-        let aylikPaketToplam = bugunPaketToplamCiro;
+        let aylikMasaToplam = Number(bugunToplamCiro);
+        let aylikPaketToplam = Number(bugunPaketToplamCiro);
 
         gecmisGunler.forEach(gun => {
             let parts = gun.tarih ? gun.tarih.split('.') : [];
             if (parts.length === 3) {
                 let gunTarihi = new Date(parts[2], parts[1] - 1, parts[0]);
                 if (gunTarihi.getMonth() === buAy && gunTarihi.getFullYear() === buYil) {
-                    aylikMasaToplam += (gun.ciro || 0);
-                    aylikPaketToplam += (gun.paketCiro || 0);
+                    aylikMasaToplam += Number(gun.ciro || 0);
+                    aylikPaketToplam += Number(gun.paketCiro || 0);
                 }
             }
         });
@@ -903,13 +910,13 @@
             if (gun.urunler) {
                 for (let u in gun.urunler) {
                     if (!tumUrunler[u]) tumUrunler[u] = { adet: 0 };
-                    tumUrunler[u].adet += gun.urunler[u].adet;
+                    tumUrunler[u].adet = Number(tumUrunler[u].adet || 0) + Number(gun.urunler[u].adet || 0);
                 }
             }
             if (gun.paketUrunler) {
                 for (let u in gun.paketUrunler) {
                     if (!tumUrunler[u]) tumUrunler[u] = { adet: 0 };
-                    tumUrunler[u].adet += gun.paketUrunler[u].adet;
+                    tumUrunler[u].adet = Number(tumUrunler[u].adet || 0) + Number(gun.paketUrunler[u].adet || 0);
                 }
             }
         });
@@ -917,8 +924,9 @@
         let enCokSatan = "-";
         let maxAdet = 0;
         for (let u in tumUrunler) {
-            if (tumUrunler[u].adet > maxAdet) {
-                maxAdet = tumUrunler[u].adet;
+            let adetVal = Number(tumUrunler[u].adet || 0);
+            if (adetVal > maxAdet) {
+                maxAdet = adetVal;
                 enCokSatan = `${u} (${maxAdet} adet)`;
             }
         }
@@ -935,10 +943,10 @@
 
         let html = "";
         gecmisGunler.forEach((gun) => {
-            let nakit = gun.nakit || 0;
-            let kart = gun.kart || 0;
-            let pCiro = gun.paketCiro || 0;
-            let mCiro = gun.ciro || 0;
+            let nakit = Number(gun.nakit || 0);
+            let kart = Number(gun.kart || 0);
+            let pCiro = Number(gun.paketCiro || 0);
+            let mCiro = Number(gun.ciro || 0);
             
             html += `
                 <div class="gecmis-satir">
@@ -973,21 +981,21 @@
             let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
 
             if (mevcutGun) {
-                let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
-                let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
-                let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
-                let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
+                let yeniCiro = Number(mevcutGun.ciro || 0) + Number(bugunToplamCiro);
+                let yeniPaketCiro = Number(mevcutGun.paketCiro || 0) + Number(bugunPaketToplamCiro);
+                let yeniNakit = Number(mevcutGun.nakit || 0) + Number(bugunNakitCiro);
+                let yeniKart = Number(mevcutGun.kart || 0) + Number(bugunKartCiro);
                 
                 let yeniUrunler = { ...(mevcutGun.urunler || {}) };
                 for (let urunAdi in bugunUrunSatis) {
                     if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { ...bugunUrunSatis[urunAdi] };
-                    else yeniUrunler[urunAdi].adet += bugunUrunSatis[urunAdi].adet;
+                    else yeniUrunler[urunAdi].adet = Number(yeniUrunler[urunAdi].adet || 0) + Number(bugunUrunSatis[urunAdi].adet || 0);
                 }
 
                 let yeniPaketUrunler = { ...(mevcutGun.paketUrunler || {}) };
                 for (let urunAdi in bugunPaketUrunSatis) {
                     if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { ...bugunPaketUrunSatis[urunAdi] };
-                    else yeniPaketUrunler[urunAdi].adet += bugunPaketUrunSatis[urunAdi].adet;
+                    else yeniPaketUrunler[urunAdi].adet = Number(yeniPaketUrunler[urunAdi].adet || 0) + Number(bugunPaketUrunSatis[urunAdi].adet || 0);
                 }
 
                 let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
@@ -1003,8 +1011,8 @@
             } else {
                 let tarihIso = new Date().toISOString();
                 db.collection("gecmis").add({
-                    tarih: bugunTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
-                    nakit: bugunNakitCiro, kart: bugunKartCiro, urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
+                    tarih: bugunTarih, tarihIso: tarihIso, ciro: Number(bugunToplamCiro), paketCiro: Number(bugunPaketToplamCiro),
+                    nakit: Number(bugunNakitCiro), kart: Number(bugunKartCiro), urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
                     paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
                     masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari))
                 }).then(() => {
@@ -1026,22 +1034,22 @@
         if (!silinecekGun) return;
 
         if (confirm(`${silinecekGun.tarih} tarihli kaydı geri yüklemek istiyor musunuz?`)) {
-            bugunToplamCiro += (silinecekGun.ciro || 0);
-            bugunPaketToplamCiro += (silinecekGun.paketCiro || 0);
-            bugunNakitCiro += (silinecekGun.nakit || 0);
-            bugunKartCiro += (silinecekGun.kart || 0);
+            bugunToplamCiro = Number(bugunToplamCiro) + Number(silinecekGun.ciro || 0);
+            bugunPaketToplamCiro = Number(bugunPaketToplamCiro) + Number(silinecekGun.paketCiro || 0);
+            bugunNakitCiro = Number(bugunNakitCiro) + Number(silinecekGun.nakit || 0);
+            bugunKartCiro = Number(bugunKartCiro) + Number(silinecekGun.kart || 0);
 
             if (silinecekGun.urunler) {
                 for (let urunAdi in silinecekGun.urunler) {
                     if (!bugunUrunSatis[urunAdi]) bugunUrunSatis[urunAdi] = silinecekGun.urunler[urunAdi];
-                    else bugunUrunSatis[urunAdi].adet += silinecekGun.urunler[urunAdi].adet;
+                    else bugunUrunSatis[urunAdi].adet = Number(bugunUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.urunler[urunAdi].adet || 0);
                 }
             }
 
             if (silinecekGun.paketUrunler) {
                 for (let urunAdi in silinecekGun.paketUrunler) {
                     if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = silinecekGun.paketUrunler[urunAdi];
-                    else bugunPaketUrunSatis[urunAdi].adet += silinecekGun.paketUrunler[urunAdi].adet;
+                    else bugunPaketUrunSatis[urunAdi].adet = Number(bugunPaketUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.paketUrunler[urunAdi].adet || 0);
                 }
             }
 
@@ -1091,7 +1099,7 @@
             if (gun.paketUrunler) {
                 for (let p in gun.paketUrunler) {
                     if (!birlesikUrunler[p]) birlesikUrunler[p] = { ...gun.paketUrunler[p] };
-                    else birlesikUrunler[p].adet += gun.paketUrunler[p].adet;
+                    else birlesikUrunler[p].adet = Number(birlesikUrunler[p].adet || 0) + Number(gun.paketUrunler[p].adet || 0);
                 }
             }
             tabloDoldur(`${gun.tarih} Toplam Satış Detayı`, birlesikUrunler);
@@ -1113,7 +1121,7 @@
         } else {
             for (let urunAdi in urunler) {
                 let item = urunler[urunAdi];
-                let toplamTutar = (item.adet || 0) * (item.fiyat || 0);
+                let toplamTutar = Number(item.adet || 0) * Number(item.fiyat || 0);
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${urunAdi}</strong></td>
@@ -1144,7 +1152,7 @@
             let genelMasaToplam = 0;
 
             bugunMasaDetaylari.forEach(item => {
-                let harcama = item.harcama || 0;
+                let harcama = Number(item.harcama || 0);
                 genelMasaToplam += harcama;
 
                 tbody.innerHTML += `
