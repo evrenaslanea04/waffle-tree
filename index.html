@@ -55,7 +55,7 @@
         .bolum-baslik { font-size: 18px; font-weight: 700; color: #2c3036; margin: 10px 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e4e9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .masalar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px; }
-        .paketler { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        .paketler { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
         
         .masa { background: #ffffff; border-radius: 16px; padding: 20px 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e4e9; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
         .masa::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e0e0e0; transition: background 0.3s; }
@@ -236,9 +236,8 @@
 
     <div class="bolum-baslik">🛵 Kurye & Online Paket Siparişler</div>
     <div class="paketler">
-        <div class="masa paket-kart" id="masaKartp1" onclick="masaAc('p1')"><h2 id="masaBaslikKartp1">Paket 1</h2><div id="durump1" class="durum-rozeti bos">Müsait</div></div>
-        <div class="masa paket-kart" id="masaKartp2" onclick="masaAc('p2')"><h2 id="masaBaslikKartp2">Paket 2</h2><div id="durump2" class="durum-rozeti bos">Müsait</div></div>
-        <div class="masa paket-kart" id="masaKartp3" onclick="masaAc('p3')"><h2 id="masaBaslikKartp3">Paket 3</h2><div id="durump3" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa paket-kart" id="masaKartp1" onclick="masaAc('p1')"><h2 id="masaBaslikKartp1">UberEats</h2><div id="durump1" class="durum-rozeti bos">Müsait</div></div>
+        <div class="masa paket-kart" id="masaKartp2" onclick="masaAc('p2')"><h2 id="masaBaslikKartp2">Yemeksepeti</h2><div id="durump2" class="durum-rozeti bos">Müsait</div></div>
     </div>
 </div>
 
@@ -258,52 +257,52 @@
                 <div class="kategori">
                     <div class="kategoriBaslik">🧇 Waffle Çeşitleri</div>
                     <div class="urunler">
-                        <button class="urun" data-ad="Çiçek Waffle" onclick="urunEkle('Çiçek Waffle',400)"><strong>Çiçek Waffle</strong>400 ₺</button>
-                        <button class="urun" data-ad="Brüksel Waffle" onclick="urunEkle('Brüksel Waffle',400)"><strong>Brüksel Waffle</strong>400 ₺</button>
-                        <button class="urun" data-ad="Bubble Waffle" onclick="urunEkle('Bubble Waffle',400)"><strong>Bubble Waffle</strong>400 ₺</button>
-                        <button class="urun" data-ad="Bardak Waffle" onclick="urunEkle('Bardak Waffle',200)"><strong>Bardak Waffle</strong>200 ₺</button>
+                        <button class="urun" data-ad="Çiçek Waffle" onclick="urunEkle('Çiçek Waffle',400)"><strong>Çiçek Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
+                        <button class="urun" data-ad="Brüksel Waffle" onclick="urunEkle('Brüksel Waffle',400)"><strong>Brüksel Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
+                        <button class="urun" data-ad="Bubble Waffle" onclick="urunEkle('Bubble Waffle',400)"><strong>Bubble Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
+                        <button class="urun" data-ad="Bardak Waffle" onclick="urunEkle('Bardak Waffle',200)"><strong>Bardak Waffle</strong><span class="urun-fiyat-metni">200 ₺</span></button>
                     </div>
                 </div>
 
                 <div class="kategori">
                     <div class="kategoriBaslik">☕ Sıcak İçecekler</div>
                     <div class="urunler">
-                        <button class="urun" data-ad="Çay" onclick="urunEkle('Çay',35)"><strong>Çay</strong>35 ₺</button>
-                        <button class="urun" data-ad="Filtre Kahve" onclick="urunEkle('Filtre Kahve',100)"><strong>Filtre Kahve</strong>100 ₺</button>
-                        <button class="urun" data-ad="Türk Kahvesi" onclick="urunEkle('Türk Kahvesi',100)"><strong>Türk Kahvesi</strong>100 ₺</button>
+                        <button class="urun" data-ad="Çay" onclick="urunEkle('Çay',35)"><strong>Çay</strong><span class="urun-fiyat-metni">35 ₺</span></button>
+                        <button class="urun" data-ad="Filtre Kahve" onclick="urunEkle('Filtre Kahve',100)"><strong>Filtre Kahve</strong><span class="urun-fiyat-metni">100 ₺</span></button>
+                        <button class="urun" data-ad="Türk Kahvesi" onclick="urunEkle('Türk Kahvesi',100)"><strong>Türk Kahvesi</strong><span class="urun-fiyat-metni">100 ₺</span></button>
                     </div>
                 </div>
 
                 <div class="kategori">
                     <div class="kategoriBaslik">🧋 Soğuk İçecekler</div>
                     <div class="urunler">
-                        <button class="urun" data-ad="Limonata" onclick="urunEkle('Limonata',90)"><strong>Limonata</strong>90 ₺</button>
-                        <button class="urun" data-ad="Coca Cola" onclick="urunEkle('Coca Cola',90)"><strong>Coca Cola</strong>90 ₺</button>
-                        <button class="urun" data-ad="Coca Cola Zero" onclick="urunEkle('Coca Cola Zero',90)"><strong>Coca Cola Zero</strong>90 ₺</button>
-                        <button class="urun" data-ad="Sprite" onclick="urunEkle('Sprite',90)"><strong>Sprite</strong>90 ₺</button>
-                        <button class="urun" data-ad="Fanta" onclick="urunEkle('Fanta',90)"><strong>Fanta</strong>90 ₺</button>
-                        <button class="urun" data-ad="Niğde Gazozu" onclick="urunEkle('Niğde Gazozu',40)"><strong>Niğde Gazozu</strong>40 ₺</button>
-                        <button class="urun" data-ad="Maden Suyu" onclick="urunEkle('Maden Suyu',40)"><strong>Maden Suyu</strong>40 ₺</button>
-                        <button class="urun" data-ad="Su" onclick="urunEkle('Su',20)"><strong>Su</strong>20 ₺</button>
+                        <button class="urun" data-ad="Limonata" onclick="urunEkle('Limonata',90)"><strong>Limonata</strong><span class="urun-fiyat-metni">90 ₺</span></button>
+                        <button class="urun" data-ad="Coca Cola" onclick="urunEkle('Coca Cola',90)"><strong>Coca Cola</strong><span class="urun-fiyat-metni">90 ₺</span></button>
+                        <button class="urun" data-ad="Coca Cola Zero" onclick="urunEkle('Coca Cola Zero',90)"><strong>Coca Cola Zero</strong><span class="urun-fiyat-metni">90 ₺</span></button>
+                        <button class="urun" data-ad="Sprite" onclick="urunEkle('Sprite',90)"><strong>Sprite</strong><span class="urun-fiyat-metni">90 ₺</span></button>
+                        <button class="urun" data-ad="Fanta" onclick="urunEkle('Fanta',90)"><strong>Fanta</strong><span class="urun-fiyat-metni">90 ₺</span></button>
+                        <button class="urun" data-ad="Niğde Gazozu" onclick="urunEkle('Niğde Gazozu',40)"><strong>Niğde Gazozu</strong><span class="urun-fiyat-metni">40 ₺</span></button>
+                        <button class="urun" data-ad="Maden Suyu" onclick="urunEkle('Maden Suyu',40)"><strong>Maden Suyu</strong><span class="urun-fiyat-metni">40 ₺</span></button>
+                        <button class="urun" data-ad="Su" onclick="urunEkle('Su',20)"><strong>Su</strong><span class="urun-fiyat-metni">20 ₺</span></button>
                     </div>
                 </div>
 
                 <div class="kategori">
                     <div class="kategoriBaslik">🧊 Soğuk Kahveler</div>
                     <div class="urunler">
-                        <button class="urun" data-ad="Ice Americano" onclick="urunEkle('Ice Americano',120)"><strong>Ice Americano</strong>120 ₺</button>
-                        <button class="urun" data-ad="Ice Latte" onclick="urunEkle('Ice Latte',150)"><strong>Ice Latte</strong>150 ₺</button>
-                        <button class="urun" data-ad="Ice Caramel Latte" onclick="urunEkle('Ice Caramel Latte',190)"><strong>Ice Caramel Latte</strong>190 ₺</button>
-                        <button class="urun" data-ad="Ice Vanilla Latte" onclick="urunEkle('Ice Vanilla Latte',190)"><strong>Ice Vanilla Latte</strong>190 ₺</button>
-                        <button class="urun" data-ad="Ice Mocha" onclick="urunEkle('Ice Mocha',190)"><strong>Ice Mocha</strong>190 ₺</button>
+                        <button class="urun" data-ad="Ice Americano" onclick="urunEkle('Ice Americano',120)"><strong>Ice Americano</strong><span class="urun-fiyat-metni">120 ₺</span></button>
+                        <button class="urun" data-ad="Ice Latte" onclick="urunEkle('Ice Latte',150)"><strong>Ice Latte</strong><span class="urun-fiyat-metni">150 ₺</span></button>
+                        <button class="urun" data-ad="Ice Caramel Latte" onclick="urunEkle('Ice Caramel Latte',190)"><strong>Ice Caramel Latte</strong><span class="urun-fiyat-metni">190 ₺</span></button>
+                        <button class="urun" data-ad="Ice Vanilla Latte" onclick="urunEkle('Ice Vanilla Latte',190)"><strong>Ice Vanilla Latte</strong><span class="urun-fiyat-metni">190 ₺</span></button>
+                        <button class="urun" data-ad="Ice Mocha" onclick="urunEkle('Ice Mocha',190)"><strong>Ice Mocha</strong><span class="urun-fiyat-metni">190 ₺</span></button>
                     </div>
                 </div>
 
                 <div class="kategori">
                     <div class="kategoriBaslik">🍨 Dondurma</div>
                     <div class="urunler">
-                        <button class="urun" data-ad="1 Top Dondurma" onclick="urunEkle('1 Top Dondurma',60)"><strong>1 Top Dondurma</strong>60 ₺</button>
-                        <button class="urun" data-ad="Kilo Dondurma" onclick="urunEkle('Kilo Dondurma',1100)"><strong>Kilo Dondurma</strong>1100 ₺</button>
+                        <button class="urun" data-ad="1 Top Dondurma" onclick="urunEkle('1 Top Dondurma',60)"><strong>1 Top Dondurma</strong><span class="urun-fiyat-metni">60 ₺</span></button>
+                        <button class="urun" data-ad="Kilo Dondurma" onclick="urunEkle('Kilo Dondurma',1100)"><strong>Kilo Dondurma</strong><span class="urun-fiyat-metni">1100 ₺</span></button>
                     </div>
                 </div>
             </div>
@@ -433,13 +432,14 @@
     let bugunKartCiro = 0;
     let bugunUrunSatis = {};
     let bugunPaketUrunSatis = {};
-    let bugunMasaDetaylari = [];
+    let bugunMasaDetaylari = []; // Masa işlem geçmişlerini tutan dizi
+    let bugunPaketDetaylari = []; // Paket (UberEats/Yemeksepeti) işlem geçmişlerini tutan dizi
     let gecmisGunler = [];
     let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
     let secilenCihaz = 'pc';
 
-    const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2','p3'];
+    const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2'];
 
     function cihazSec(tur) {
         secilenCihaz = tur;
@@ -457,9 +457,8 @@
 
     function varsayilanIsimGetir(key) {
         if (key === '12') return "Take Away Paket";
-        if (key === 'p1') return "Paket 1";
-        if (key === 'p2') return "Paket 2";
-        if (key === 'p3') return "Paket 3";
+        if (key === 'p1') return "UberEats";
+        if (key === 'p2') return "Yemeksepeti";
         return "Masa " + key;
     }
 
@@ -481,16 +480,17 @@
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
         if (doc.exists) {
             let data = doc.data();
-            bugunToplamCiro = Number(data.ciro) || 0;
-            bugunPaketToplamCiro = Number(data.paketCiro) || 0;
-            bugunNakitCiro = Number(data.nakit) || 0;
-            bugunKartCiro = Number(data.kart) || 0;
+            bugunToplamCiro = data.ciro || 0;
+            bugunPaketToplamCiro = data.paketCiro || 0;
+            bugunNakitCiro = data.nakit || 0;
+            bugunKartCiro = data.kart || 0;
             bugunUrunSatis = data.urunler || {};
             bugunPaketUrunSatis = data.paketUrunler || {};
             bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
+            bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
         } else {
             bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-            bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = [];
+            bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
         }
         bugunCirosunuGuncelle();
     });
@@ -505,13 +505,8 @@
     function masaIsimleriniKaydet() { db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri); }
     function bugunVerileriniKaydet() {
         db.collection("pos_data").doc("bugun").set({
-            ciro: Number(bugunToplamCiro) || 0,
-            paketCiro: Number(bugunPaketToplamCiro) || 0,
-            nakit: Number(bugunNakitCiro) || 0,
-            kart: Number(bugunKartCiro) || 0,
-            urunler: bugunUrunSatis,
-            paketUrunler: bugunPaketUrunSatis,
-            masaDetaylari: bugunMasaDetaylari
+            ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
+            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari, paketDetaylari: bugunPaketDetaylari
         });
     }
 
@@ -523,6 +518,11 @@
         
         iskontoUygula(0);
         hesapBol(1);
+
+        let isPaketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
+        document.querySelectorAll('.urun-fiyat-metni').forEach(el => {
+            el.style.display = isPaketKanal ? "none" : "inline";
+        });
 
         let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
         document.getElementById("masaBaslik").innerText = gosterilecekIsim;
@@ -598,9 +598,9 @@
         let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
 
         if (mevcutUrun) {
-            mevcutUrun.adet = Number(mevcutUrun.adet) + 1;
+            mevcutUrun.adet++;
         } else {
-            siparis.push({ ad: urunAdi, fiyat: Number(fiyat), adet: 1, ikramMi: false });
+            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false, ozelFiyat: (seciliMasa === 'p1' || seciliMasa === 'p2') ? 0 : null });
         }
         masalariKaydet();
     }
@@ -609,8 +609,16 @@
         let siparis = masalar[seciliMasa];
         if (!siparis) return;
         
-        siparis[index].adet = Number(siparis[index].adet) + Number(miktar);
+        siparis[index].adet += miktar;
         if (siparis[index].adet <= 0) siparis.splice(index, 1);
+        masalariKaydet();
+    }
+
+    function ozelFiyatGuncelle(index, yeniDeger) {
+        let siparis = masalar[seciliMasa];
+        if (!siparis || !siparis[index]) return;
+        let val = parseFloat(yeniDeger);
+        siparis[index].ozelFiyat = isNaN(val) ? 0 : val;
         masalariKaydet();
     }
 
@@ -623,7 +631,7 @@
     }
 
     function iskontoUygula(yuzde) {
-        aktifIskontoOrani = Number(yuzde);
+        aktifIskontoOrani = yuzde;
         [0, 10, 20, 50].forEach(val => {
             let btn = document.getElementById("ikramBtn" + val);
             if (btn) {
@@ -635,7 +643,7 @@
     }
 
     function hesapBol(kisiSayisi) {
-        aktifBolmeSayisi = Number(kisiSayisi);
+        aktifBolmeSayisi = kisiSayisi;
         [1, 2, 3, 4].forEach(val => {
             let btn = document.getElementById("bolmeBtn" + val);
             if (btn) {
@@ -649,6 +657,7 @@
     function siparisiGoster() {
         let liste = document.getElementById("siparisListesi");
         let siparis = masalar[seciliMasa] || [];
+        let isPaketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
 
         document.querySelectorAll('.urun').forEach(btn => {
             let ad = btn.getAttribute('data-ad');
@@ -656,7 +665,7 @@
             if (varOlanBadge) btn.removeChild(varOlanBadge);
 
             let urunGrup = siparis.filter(u => u.ad === ad);
-            let toplamAdet = urunGrup.reduce((s, u) => s + Number(u.adet), 0);
+            let toplamAdet = urunGrup.reduce((s, u) => s + u.adet, 0);
 
             if (toplamAdet > 0) {
                 let badge = document.createElement('span');
@@ -679,23 +688,35 @@
         let hamToplam = 0;
 
         siparis.forEach((urun, index) => {
-            let urunFiyati = urun.ikramMi ? 0 : Number(urun.fiyat);
-            let araToplam = urunFiyati * Number(urun.adet);
+            let birimFiyat = isPaketKanal ? (urun.ozelFiyat || 0) : urun.fiyat;
+            let urunFiyati = urun.ikramMi ? 0 : birimFiyat;
+            let araToplam = urunFiyati * urun.adet;
             hamToplam += araToplam;
 
             let urunMetni = urun.ikramMi 
                 ? `<span class="ikram-urunu">${urun.ad}</span> <span class="ikram-rozeti">[İKRAM]</span>` 
                 : `<strong>${urun.ad}</strong>`;
 
-            let fiyatMetni = urun.ikramMi 
-                ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺` 
-                : `${urun.fiyat} ₺`;
+            let fiyatMetni = "";
+            if (isPaketKanal) {
+                fiyatMetni = `<div style="margin-top:4px; display:flex; align-items:center; gap:5px;">
+                    <span style="font-size:12px; font-weight:bold;">Tutar (₺):</span>
+                    <input type="number" value="${urun.ozelFiyat !== undefined && urun.ozelFiyat !== null ? urun.ozelFiyat : 0}" 
+                           onchange="ozelFiyatGuncelle(${index}, this.value)" 
+                           onkeyup="ozelFiyatGuncelle(${index}, this.value)"
+                           style="width:80px; padding:3px 6px; border:1px solid #cbd5e0; border-radius:6px; font-weight:bold;">
+                </div>`;
+            } else {
+                fiyatMetni = urun.ikramMi 
+                    ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺` 
+                    : `${urun.fiyat} ₺`;
+            }
 
             html += `
                 <div class="siparisSatiri">
                     <div>
                         ${urunMetni}<br>
-                        ${fiyatMetni} × ${urun.adet}
+                        ${fiyatMetni} ${isPaketKanal ? '' : '× ' + urun.adet}
                     </div>
                     <div class="adetButonlari">
                         <button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>
@@ -744,7 +765,11 @@
 
             if (durum) {
                 if (siparis.length > 0) {
-                    let toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat)) * Number(urun.adet)), 0);
+                    let isPaketKanal = (key === 'p1' || key === 'p2');
+                    let toplam = siparis.reduce((sum, urun) => {
+                        let f = isPaketKanal ? (urun.ozelFiyat || 0) : urun.fiyat;
+                        return sum + ((urun.ikramMi ? 0 : f) * urun.adet);
+                    }, 0);
                     durum.innerText = toplam + " ₺";
                     durum.className = "durum-rozeti dolu";
                     if (masaKart) {
@@ -769,7 +794,7 @@
             return;
         }
 
-        let hedefMasa = prompt(`${varsayilanIsimGetir(seciliMasa)} siparişlerini nereye aktarmak istiyorsunuz? (Masa: 1-12 | Paket: p1, p2, p3):`);
+        let hedefMasa = prompt(`${varsayilanIsimGetir(seciliMasa)} siparişlerini nereye aktarmak istiyorsunuz? (Masa: 1-12 | Paket: p1, p2):`);
         if (!hedefMasa) return;
         hedefMasa = hedefMasa.trim().toLowerCase();
 
@@ -805,7 +830,7 @@
             return;
         }
 
-        if (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3') {
+        if (seciliMasa === 'p1' || seciliMasa === 'p2') {
             hesapKapat('Paket Servis');
         } else {
             document.getElementById("odemeTipiEkrani").style.display = "flex";
@@ -814,40 +839,49 @@
 
     function hesapKapat(odemeYontemi) {
         let siparis = masalar[seciliMasa];
-        if (!siparis || siparis.length === 0) return;
+        let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2');
+        
+        let hamToplam = siparis.reduce((sum, urun) => {
+            let f = isPaket ? (urun.ozelFiyat || 0) : urun.fiyat;
+            return sum + ((urun.ikramMi ? 0 : f) * urun.adet);
+        }, 0);
 
-        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat)) * Number(urun.adet)), 0);
         let odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
-
-        let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2' || seciliMasa === 'p3');
         let hedefSatisObjesi = isPaket ? bugunPaketUrunSatis : bugunUrunSatis;
 
         let masaUrunOzet = [];
 
         siparis.forEach(urun => {
             let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
-            let netFiyat = urun.ikramMi ? 0 : Number(urun.fiyat);
+            let birimFiyat = isPaket ? (urun.ozelFiyat || 0) : urun.fiyat;
+            let netFiyat = urun.ikramMi ? 0 : birimFiyat;
             
             if (!hedefSatisObjesi[urunAdi]) {
                 hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: netFiyat };
             }
-            hedefSatisObjesi[urunAdi].adet = Number(hedefSatisObjesi[urunAdi].adet) + Number(urun.adet);
+            hedefSatisObjesi[urunAdi].adet += urun.adet;
 
             masaUrunOzet.push(`${urun.adet}x ${urunAdi}`);
         });
 
         let simdi = new Date();
         let saatStr = simdi.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
 
         if (isPaket) {
-            bugunPaketToplamCiro = Number(bugunPaketToplamCiro) + Number(odenecekTutar);
-        } else {
-            bugunToplamCiro = Number(bugunToplamCiro) + Number(odenecekTutar);
-            if (odemeYontemi === 'Nakit') bugunNakitCiro = Number(bugunNakitCiro) + Number(odenecekTutar);
-            else if (odemeYontemi === 'Kart') bugunKartCiro = Number(bugunKartCiro) + Number(odenecekTutar);
-
-            let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
+            bugunPaketToplamCiro += odenecekTutar;
             
+            bugunPaketDetaylari.push({
+                masaAdi: masaIsmi,
+                harcama: odenecekTutar,
+                saat: saatStr,
+                urunlerDetay: masaUrunOzet.join(", ")
+            });
+        } else {
+            bugunToplamCiro += odenecekTutar;
+            if (odemeYontemi === 'Nakit') bugunNakitCiro += odenecekTutar;
+            else if (odemeYontemi === 'Kart') bugunKartCiro += odenecekTutar;
+
             bugunMasaDetaylari.push({
                 masaAdi: masaIsmi,
                 harcama: odenecekTutar,
@@ -879,9 +913,9 @@
     }
 
     function bugunCirosunuGuncelle() {
-        document.getElementById("bugunCiro").innerText = Number(bugunToplamCiro).toFixed(0);
-        document.getElementById("bugunPaketCiro").innerText = Number(bugunPaketToplamCiro).toFixed(0);
-        document.getElementById("bugunOdemeKanalVal").innerText = `${Number(bugunNakitCiro).toFixed(0)} ₺ Nakit / ${Number(bugunKartCiro).toFixed(0)} ₺ Kart`;
+        document.getElementById("bugunCiro").innerText = bugunToplamCiro.toFixed(0);
+        document.getElementById("bugunPaketCiro").innerText = bugunPaketToplamCiro.toFixed(0);
+        document.getElementById("bugunOdemeKanalVal").innerText = `${bugunNakitCiro.toFixed(0)} ₺ Nakit / ${bugunKartCiro.toFixed(0)} ₺ Kart`;
         analizleriGuncelle();
     }
 
@@ -889,16 +923,16 @@
         let buAy = new Date().getMonth();
         let buYil = new Date().getFullYear();
         
-        let aylikMasaToplam = Number(bugunToplamCiro);
-        let aylikPaketToplam = Number(bugunPaketToplamCiro);
+        let aylikMasaToplam = bugunToplamCiro;
+        let aylikPaketToplam = bugunPaketToplamCiro;
 
         gecmisGunler.forEach(gun => {
             let parts = gun.tarih ? gun.tarih.split('.') : [];
             if (parts.length === 3) {
                 let gunTarihi = new Date(parts[2], parts[1] - 1, parts[0]);
                 if (gunTarihi.getMonth() === buAy && gunTarihi.getFullYear() === buYil) {
-                    aylikMasaToplam += Number(gun.ciro || 0);
-                    aylikPaketToplam += Number(gun.paketCiro || 0);
+                    aylikMasaToplam += (gun.ciro || 0);
+                    aylikPaketToplam += (gun.paketCiro || 0);
                 }
             }
         });
@@ -910,13 +944,13 @@
             if (gun.urunler) {
                 for (let u in gun.urunler) {
                     if (!tumUrunler[u]) tumUrunler[u] = { adet: 0 };
-                    tumUrunler[u].adet = Number(tumUrunler[u].adet || 0) + Number(gun.urunler[u].adet || 0);
+                    tumUrunler[u].adet += gun.urunler[u].adet;
                 }
             }
             if (gun.paketUrunler) {
                 for (let u in gun.paketUrunler) {
                     if (!tumUrunler[u]) tumUrunler[u] = { adet: 0 };
-                    tumUrunler[u].adet = Number(tumUrunler[u].adet || 0) + Number(gun.paketUrunler[u].adet || 0);
+                    tumUrunler[u].adet += gun.paketUrunler[u].adet;
                 }
             }
         });
@@ -924,9 +958,8 @@
         let enCokSatan = "-";
         let maxAdet = 0;
         for (let u in tumUrunler) {
-            let adetVal = Number(tumUrunler[u].adet || 0);
-            if (adetVal > maxAdet) {
-                maxAdet = adetVal;
+            if (tumUrunler[u].adet > maxAdet) {
+                maxAdet = tumUrunler[u].adet;
                 enCokSatan = `${u} (${maxAdet} adet)`;
             }
         }
@@ -943,10 +976,10 @@
 
         let html = "";
         gecmisGunler.forEach((gun) => {
-            let nakit = Number(gun.nakit || 0);
-            let kart = Number(gun.kart || 0);
-            let pCiro = Number(gun.paketCiro || 0);
-            let mCiro = Number(gun.ciro || 0);
+            let nakit = gun.nakit || 0;
+            let kart = gun.kart || 0;
+            let pCiro = gun.paketCiro || 0;
+            let mCiro = gun.ciro || 0;
             
             html += `
                 <div class="gecmis-satir">
@@ -981,28 +1014,29 @@
             let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
 
             if (mevcutGun) {
-                let yeniCiro = Number(mevcutGun.ciro || 0) + Number(bugunToplamCiro);
-                let yeniPaketCiro = Number(mevcutGun.paketCiro || 0) + Number(bugunPaketToplamCiro);
-                let yeniNakit = Number(mevcutGun.nakit || 0) + Number(bugunNakitCiro);
-                let yeniKart = Number(mevcutGun.kart || 0) + Number(bugunKartCiro);
+                let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
+                let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
+                let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
+                let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
                 
                 let yeniUrunler = { ...(mevcutGun.urunler || {}) };
                 for (let urunAdi in bugunUrunSatis) {
                     if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { ...bugunUrunSatis[urunAdi] };
-                    else yeniUrunler[urunAdi].adet = Number(yeniUrunler[urunAdi].adet || 0) + Number(bugunUrunSatis[urunAdi].adet || 0);
+                    else yeniUrunler[urunAdi].adet += bugunUrunSatis[urunAdi].adet;
                 }
 
                 let yeniPaketUrunler = { ...(mevcutGun.paketUrunler || {}) };
                 for (let urunAdi in bugunPaketUrunSatis) {
                     if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { ...bugunPaketUrunSatis[urunAdi] };
-                    else yeniPaketUrunler[urunAdi].adet = Number(yeniPaketUrunler[urunAdi].adet || 0) + Number(bugunPaketUrunSatis[urunAdi].adet || 0);
+                    else yeniPaketUrunler[urunAdi].adet += bugunPaketUrunSatis[urunAdi].adet;
                 }
 
                 let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
+                let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
 
                 db.collection("gecmis").doc(mevcutGun.id).update({
                     ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
-                    urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari
+                    urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
@@ -1011,10 +1045,11 @@
             } else {
                 let tarihIso = new Date().toISOString();
                 db.collection("gecmis").add({
-                    tarih: bugunTarih, tarihIso: tarihIso, ciro: Number(bugunToplamCiro), paketCiro: Number(bugunPaketToplamCiro),
-                    nakit: Number(bugunNakitCiro), kart: Number(bugunKartCiro), urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
+                    tarih: bugunTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
+                    nakit: bugunNakitCiro, kart: bugunKartCiro, urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
                     paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
-                    masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari))
+                    masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
+                    paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
                 }).then(() => {
                     sifirlaVeKaydet();
                     alert("Gün başarıyla aktarıldı!");
@@ -1025,7 +1060,7 @@
 
     function sifirlaVeKaydet() {
         bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = [];
+        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
         bugunVerileriniKaydet();
     }
 
@@ -1034,27 +1069,30 @@
         if (!silinecekGun) return;
 
         if (confirm(`${silinecekGun.tarih} tarihli kaydı geri yüklemek istiyor musunuz?`)) {
-            bugunToplamCiro = Number(bugunToplamCiro) + Number(silinecekGun.ciro || 0);
-            bugunPaketToplamCiro = Number(bugunPaketToplamCiro) + Number(silinecekGun.paketCiro || 0);
-            bugunNakitCiro = Number(bugunNakitCiro) + Number(silinecekGun.nakit || 0);
-            bugunKartCiro = Number(bugunKartCiro) + Number(silinecekGun.kart || 0);
+            bugunToplamCiro += (silinecekGun.ciro || 0);
+            bugunPaketToplamCiro += (silinecekGun.paketCiro || 0);
+            bugunNakitCiro += (silinecekGun.nakit || 0);
+            bugunKartCiro += (silinecekGun.kart || 0);
 
             if (silinecekGun.urunler) {
                 for (let urunAdi in silinecekGun.urunler) {
                     if (!bugunUrunSatis[urunAdi]) bugunUrunSatis[urunAdi] = silinecekGun.urunler[urunAdi];
-                    else bugunUrunSatis[urunAdi].adet = Number(bugunUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.urunler[urunAdi].adet || 0);
+                    else bugunUrunSatis[urunAdi].adet += silinecekGun.urunler[urunAdi].adet;
                 }
             }
 
             if (silinecekGun.paketUrunler) {
                 for (let urunAdi in silinecekGun.paketUrunler) {
                     if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = silinecekGun.paketUrunler[urunAdi];
-                    else bugunPaketUrunSatis[urunAdi].adet = Number(bugunPaketUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.paketUrunler[urunAdi].adet || 0);
+                    else bugunPaketUrunSatis[urunAdi].adet += silinecekGun.paketUrunler[urunAdi].adet;
                 }
             }
 
             if (Array.isArray(silinecekGun.masaDetaylari)) {
                 bugunMasaDetaylari = [...bugunMasaDetaylari, ...silinecekGun.masaDetaylari];
+            }
+            if (Array.isArray(silinecekGun.paketDetaylari)) {
+                bugunPaketDetaylari = [...bugunPaketDetaylari, ...silinecekGun.paketDetaylari];
             }
 
             db.collection("gecmis").doc(docId).delete().then(() => {
@@ -1088,7 +1126,7 @@
         if (tip === 'masa') {
             masaBazliDetayGoster();
         } else {
-            tabloDoldur("Bugün Paket Servis Satış Detayı", bugunPaketUrunSatis);
+            paketBazliDetayGoster();
         }
     }
 
@@ -1099,7 +1137,7 @@
             if (gun.paketUrunler) {
                 for (let p in gun.paketUrunler) {
                     if (!birlesikUrunler[p]) birlesikUrunler[p] = { ...gun.paketUrunler[p] };
-                    else birlesikUrunler[p].adet = Number(birlesikUrunler[p].adet || 0) + Number(gun.paketUrunler[p].adet || 0);
+                    else birlesikUrunler[p].adet += gun.paketUrunler[p].adet;
                 }
             }
             tabloDoldur(`${gun.tarih} Toplam Satış Detayı`, birlesikUrunler);
@@ -1121,7 +1159,7 @@
         } else {
             for (let urunAdi in urunler) {
                 let item = urunler[urunAdi];
-                let toplamTutar = Number(item.adet || 0) * Number(item.fiyat || 0);
+                let toplamTutar = (item.adet || 0) * (item.fiyat || 0);
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${urunAdi}</strong></td>
@@ -1152,7 +1190,7 @@
             let genelMasaToplam = 0;
 
             bugunMasaDetaylari.forEach(item => {
-                let harcama = Number(item.harcama || 0);
+                let harcama = item.harcama || 0;
                 genelMasaToplam += harcama;
 
                 tbody.innerHTML += `
@@ -1169,6 +1207,47 @@
                 <tr style="background:#e6fffa; color:#234e52; font-weight:800; font-size:15px; border-top:2px solid #319795;">
                     <td colspan="3">GENEL MASA TOPLAMI</td>
                     <td style="text-align:right;">${genelMasaToplam.toFixed(0)} ₺</td>
+                </tr>
+            `;
+        }
+
+        document.getElementById("detayEkrani").style.display = "flex";
+    }
+
+    function paketBazliDetayGoster() {
+        document.getElementById("detayBaslik").innerText = "Bugün Paket Servis Satış Detayı";
+        document.getElementById("detayTabloHead").innerHTML = `
+            <th>Paket Kanalı</th>
+            <th>Paket Detay (İçerik)</th>
+            <th>Saat</th>
+            <th style="text-align:right;">Ciro</th>
+        `;
+        let tbody = document.getElementById("detayTabloBody");
+        tbody.innerHTML = "";
+
+        if (!bugunPaketDetaylari || bugunPaketDetaylari.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>Bugün henüz işlem gören paket siparişi bulunmuyor.</td></tr>";
+        } else {
+            let genelPaketToplam = 0;
+
+            bugunPaketDetaylari.forEach(item => {
+                let harcama = item.harcama || 0;
+                genelPaketToplam += harcama;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.masaAdi || '-'}</strong></td>
+                        <td style="font-size:12px; color:#555;">${item.urunlerDetay || '-'}</td>
+                        <td style="font-size:12px; color:#777;">${item.saat || '-'}</td>
+                        <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML += `
+                <tr style="background:#ebf8ff; color:#2b6cb0; font-weight:800; font-size:15px; border-top:2px solid #3182ce;">
+                    <td colspan="3">GENEL PAKET TOPLAMI</td>
+                    <td style="text-align:right;">${genelPaketToplam.toFixed(0)} ₺</td>
                 </tr>
             `;
         }
