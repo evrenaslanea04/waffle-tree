@@ -123,6 +123,11 @@
         .toplam-alan { border-top: 2px solid #e2e8f0; padding-top: 8px; text-align: right; font-size: 20px; font-weight: 800; color: #2f855a; }
         .kisi-basi-bilgi { font-size: 13px; color: #3182ce; font-weight: bold; margin-top: 2px; }
         .eski-fiyat { text-decoration: line-through; color: #a0aec0; font-size: 15px; margin-right: 8px; }
+        
+        .paket-toplam-girdi-alan { background: #ebf8ff; border: 1.5px solid #3182ce; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .paket-toplam-girdi-alan label { font-size: 14px; font-weight: bold; color: #2b6cb0; }
+        .paket-toplam-girdi-alan input { width: 110px; padding: 6px 10px; border: 2px solid #3182ce; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: right; color: #2b6cb0; outline: none; }
+
         .odemeAlindi { width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 10px; background: #38a169; color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 161, 105, 0.2); transition: 0.2s; }
         .odemeAlindi:hover { background: #2f855a; }
         .odeme-secenekleri { display: flex; gap: 15px; margin-top: 20px; }
@@ -311,7 +316,14 @@
                 <h3>🧾 Sipariş Özeti</h3>
                 <div class="siparisListesi" id="siparisListesi">Henüz ürün eklenmedi.</div>
                 
-                <div class="iskonto-alan">
+                <div class="paket-toplam-girdi-alan" id="paketToplamGirdiAlan" style="display:none;">
+                    <label for="topluPaketFiyatiInput">💰 Paket Toplam Tutar:</label>
+                    <div>
+                        <input type="number" id="topluPaketFiyatiInput" value="0" onchange="topluPaketFiyatiGuncelle(this.value)" onkeyup="topluPaketFiyatiGuncelle(this.value)"> ₺
+                    </div>
+                </div>
+
+                <div class="iskonto-alan" id="iskontoBolumu">
                     <div class="iskonto-baslik">
                         <span>🏷️ İSKONTO ORANI</span>
                         <span>👥 HESABI BÖL</span>
@@ -426,14 +438,15 @@
     let seciliMasa = null;
     let masalar = {};
     let masaIsimleri = {};
+    let paketToplamTutarlari = {}; // p1 ve p2 için toplu tutarı saklar
     let bugunToplamCiro = 0;
     let bugunPaketToplamCiro = 0;
     let bugunNakitCiro = 0;
     let bugunKartCiro = 0;
     let bugunUrunSatis = {};
     let bugunPaketUrunSatis = {};
-    let bugunMasaDetaylari = []; // Masa işlem geçmişlerini tutan dizi
-    let bugunPaketDetaylari = []; // Paket (UberEats/Yemeksepeti) işlem geçmişlerini tutan dizi
+    let bugunMasaDetaylari = []; 
+    let bugunPaketDetaylari = []; 
     let gecmisGunler = [];
     let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
@@ -477,6 +490,12 @@
         }
     });
 
+    db.collection("pos_data").doc("paketToplamTutarlari").onSnapshot((doc) => {
+        paketToplamTutarlari = doc.exists ? (doc.data() || {}) : {};
+        tumMasaDurumlariniGuncelle();
+        if (seciliMasa) siparisiGoster();
+    });
+
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
         if (doc.exists) {
             let data = doc.data();
@@ -503,6 +522,8 @@
 
     function masalariKaydet() { db.collection("pos_data").doc("masalar").set(masalar); }
     function masaIsimleriniKaydet() { db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri); }
+    function paketTutarlariniKaydet() { db.collection("pos_data").doc("paketToplamTutarlari").set(paketToplamTutarlari); }
+    
     function bugunVerileriniKaydet() {
         db.collection("pos_data").doc("bugun").set({
             ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
@@ -520,9 +541,23 @@
         hesapBol(1);
 
         let isPaketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
+        
         document.querySelectorAll('.urun-fiyat-metni').forEach(el => {
             el.style.display = isPaketKanal ? "none" : "inline";
         });
+
+        let paketGirdiAlani = document.getElementById("paketToplamGirdiAlan");
+        let iskontoBolumu = document.getElementById("iskontoBolumu");
+
+        if (isPaketKanal) {
+            paketGirdiAlani.style.display = "flex";
+            iskontoBolumu.style.display = "none";
+            let kayitliTutar = paketToplamTutarlari[seciliMasa] || 0;
+            document.getElementById("topluPaketFiyatiInput").value = kayitliTutar;
+        } else {
+            paketGirdiAlani.style.display = "none";
+            iskontoBolumu.style.display = "block";
+        }
 
         let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
         document.getElementById("masaBaslik").innerText = gosterilecekIsim;
@@ -600,7 +635,7 @@
         if (mevcutUrun) {
             mevcutUrun.adet++;
         } else {
-            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false, ozelFiyat: (seciliMasa === 'p1' || seciliMasa === 'p2') ? 0 : null });
+            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false });
         }
         masalariKaydet();
     }
@@ -614,12 +649,12 @@
         masalariKaydet();
     }
 
-    function ozelFiyatGuncelle(index, yeniDeger) {
-        let siparis = masalar[seciliMasa];
-        if (!siparis || !siparis[index]) return;
-        let val = parseFloat(yeniDeger);
-        siparis[index].ozelFiyat = isNaN(val) ? 0 : val;
-        masalariKaydet();
+    function topluPaketFiyatiGuncelle(yeniTutar) {
+        if (seciliMasa === 'p1' || seciliMasa === 'p2') {
+            let val = parseFloat(yeniTutar);
+            paketToplamTutarlari[seciliMasa] = isNaN(val) ? 0 : val;
+            paketTutarlariniKaydet();
+        }
     }
 
     function urunIkramToggle(index) {
@@ -685,71 +720,67 @@
         }
 
         let html = "";
-        let hamToplam = 0;
+        let hamMasaToplam = 0;
 
         siparis.forEach((urun, index) => {
-            let birimFiyat = isPaketKanal ? (urun.ozelFiyat || 0) : urun.fiyat;
-            let urunFiyati = urun.ikramMi ? 0 : birimFiyat;
+            let urunFiyati = urun.ikramMi ? 0 : urun.fiyat;
             let araToplam = urunFiyati * urun.adet;
-            hamToplam += araToplam;
+            hamMasaToplam += araToplam;
 
             let urunMetni = urun.ikramMi 
                 ? `<span class="ikram-urunu">${urun.ad}</span> <span class="ikram-rozeti">[İKRAM]</span>` 
                 : `<strong>${urun.ad}</strong>`;
 
-            let fiyatMetni = "";
-            if (isPaketKanal) {
-                fiyatMetni = `<div style="margin-top:4px; display:flex; align-items:center; gap:5px;">
-                    <span style="font-size:12px; font-weight:bold;">Tutar (₺):</span>
-                    <input type="number" value="${urun.ozelFiyat !== undefined && urun.ozelFiyat !== null ? urun.ozelFiyat : 0}" 
-                           onchange="ozelFiyatGuncelle(${index}, this.value)" 
-                           onkeyup="ozelFiyatGuncelle(${index}, this.value)"
-                           style="width:80px; padding:3px 6px; border:1px solid #cbd5e0; border-radius:6px; font-weight:bold;">
-                </div>`;
-            } else {
-                fiyatMetni = urun.ikramMi 
-                    ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺` 
-                    : `${urun.fiyat} ₺`;
-            }
+            let fiyatMetni = isPaketKanal ? '' : (urun.ikramMi ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺ × ${urun.adet}` : `${urun.fiyat} ₺ × ${urun.adet}`);
 
             html += `
                 <div class="siparisSatiri">
                     <div>
                         ${urunMetni}<br>
-                        ${fiyatMetni} ${isPaketKanal ? '' : '× ' + urun.adet}
+                        ${fiyatMetni}
                     </div>
                     <div class="adetButonlari">
-                        <button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>
+                        ${!isPaketKanal ? `<button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>` : ''}
                         <button onclick="adetDegistir(${index},-1)">-</button>
                         <button onclick="adetDegistir(${index},1)">+</button>
-                        <span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>
+                        ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
                     </div>
                 </div>
             `;
         });
 
         liste.innerHTML = html;
-        let indirimliToplam = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
-        
-        if (aktifIskontoOrani > 0) {
-            document.getElementById("eskiFiyat").innerText = hamToplam + " ₺";
-            document.getElementById("eskiFiyat").style.display = "inline";
-        } else {
+
+        let genelNihaiToplam = 0;
+
+        if (isPaketKanal) {
+            genelNihaiToplam = paketToplamTutarlari[seciliMasa] || 0;
             document.getElementById("eskiFiyat").style.display = "none";
+            document.getElementById("kisiBasiBilgi").style.display = "none";
+        } else {
+            let indirimliToplam = hamMasaToplam - (hamMasaToplam * (aktifIskontoOrani / 100));
+            genelNihaiToplam = indirimliToplam;
+
+            if (aktifIskontoOrani > 0) {
+                document.getElementById("eskiFiyat").innerText = hamMasaToplam + " ₺";
+                document.getElementById("eskiFiyat").style.display = "inline";
+            } else {
+                document.getElementById("eskiFiyat").style.display = "none";
+            }
+
+            let kisiBasiAlan = document.getElementById("kisiBasiBilgi");
+            if (aktifBolmeSayisi > 1) {
+                let kisiBasiTutar = (indirimliToplam / aktifBolmeSayisi).toFixed(2);
+                kisiBasiAlan.innerText = `👥 ${aktifBolmeSayisi} Kişi Başı: ${kisiBasiTutar} ₺`;
+                kisiBasiAlan.style.display = "block";
+            } else {
+                kisiBasiAlan.style.display = "none";
+            }
         }
 
-        let netTutarStr = indirimliToplam.toFixed(0);
+        let netTutarStr = genelNihaiToplam.toFixed(0);
         document.getElementById("toplam").innerText = netTutarStr;
         document.getElementById("mobilToplamText").innerText = netTutarStr;
-
-        let kisiBasiAlan = document.getElementById("kisiBasiBilgi");
-        if (aktifBolmeSayisi > 1) {
-            let kisiBasiTutar = (indirimliToplam / aktifBolmeSayisi).toFixed(2);
-            kisiBasiAlan.innerText = `👥 ${aktifBolmeSayisi} Kişi Başı: ${kisiBasiTutar} ₺`;
-            kisiBasiAlan.style.display = "block";
-        } else {
-            kisiBasiAlan.style.display = "none";
-        }
     }
 
     function tumMasaDurumlariniGuncelle() {
@@ -766,10 +797,14 @@
             if (durum) {
                 if (siparis.length > 0) {
                     let isPaketKanal = (key === 'p1' || key === 'p2');
-                    let toplam = siparis.reduce((sum, urun) => {
-                        let f = isPaketKanal ? (urun.ozelFiyat || 0) : urun.fiyat;
-                        return sum + ((urun.ikramMi ? 0 : f) * urun.adet);
-                    }, 0);
+                    let toplam = 0;
+
+                    if (isPaketKanal) {
+                        toplam = paketToplamTutarlari[key] || 0;
+                    } else {
+                        toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+                    }
+
                     durum.innerText = toplam + " ₺";
                     durum.className = "durum-rozeti dolu";
                     if (masaKart) {
@@ -813,6 +848,14 @@
         masalar[hedefMasa] = masalar[hedefMasa].concat(masalar[seciliMasa]);
         masalar[seciliMasa] = [];
 
+        if (seciliMasa === 'p1' || seciliMasa === 'p2') {
+            if (hedefMasa === 'p1' || hedefMasa === 'p2') {
+                paketToplamTutarlari[hedefMasa] = (paketToplamTutarlari[hedefMasa] || 0) + (paketToplamTutarlari[seciliMasa] || 0);
+            }
+            delete paketToplamTutarlari[seciliMasa];
+            paketTutarlariniKaydet();
+        }
+
         if (masaIsimleri[seciliMasa]) {
             masaIsimleri[hedefMasa] = masaIsimleri[seciliMasa];
             delete masaIsimleri[seciliMasa];
@@ -840,24 +883,23 @@
     function hesapKapat(odemeYontemi) {
         let siparis = masalar[seciliMasa];
         let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2');
-        
-        let hamToplam = siparis.reduce((sum, urun) => {
-            let f = isPaket ? (urun.ozelFiyat || 0) : urun.fiyat;
-            return sum + ((urun.ikramMi ? 0 : f) * urun.adet);
-        }, 0);
+        let odenecekTutar = 0;
 
-        let odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
+        if (isPaket) {
+            odenecekTutar = paketToplamTutarlari[seciliMasa] || 0;
+        } else {
+            let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+            odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
+        }
+
         let hedefSatisObjesi = isPaket ? bugunPaketUrunSatis : bugunUrunSatis;
-
         let masaUrunOzet = [];
 
         siparis.forEach(urun => {
             let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
-            let birimFiyat = isPaket ? (urun.ozelFiyat || 0) : urun.fiyat;
-            let netFiyat = urun.ikramMi ? 0 : birimFiyat;
             
             if (!hedefSatisObjesi[urunAdi]) {
-                hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: netFiyat };
+                hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: urun.fiyat };
             }
             hedefSatisObjesi[urunAdi].adet += urun.adet;
 
@@ -896,8 +938,10 @@
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
+        delete paketToplamTutarlari[seciliMasa];
         
         masaIsimleriniKaydet();
+        paketTutarlariniKaydet();
         masalariKaydet();
 
         let mobilOverlay = document.getElementById("mobilSepetModalOverlay");
