@@ -18,7 +18,7 @@
             position: fixed; inset: 0; background: #1e2025; z-index: 99999;
             display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 25px;
         }
-        #cihazSecimEkrani h1 { color: white; font-size: 26px; margin-bottom: 10px; }
+        #cihazSecimEkrani h1 { color: white; font-size: 26px; margin-bottom: 10px; text-align: center; }
         .secim-butonlari { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         .cihaz-btn {
             background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.2);
@@ -35,7 +35,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
         }
         
-        .header-logo { max-height: 40px; width: auto; object-fit: contain; cursor: pointer; }
+        .header-logo { max-height: 40px; width: auto; object-fit: contain; }
         .header-ciro-alani { display: flex; gap: 12px; }
 
         .bugun-ciro-kutusu { 
@@ -104,7 +104,7 @@
         .siparisListesi { flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 5px; }
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: 14px; }
         
-        /* Mobil satır düzenlemesi */
+        /* Mobil Satır Stili */
         .siparisSatiri.mobil-satir {
             display: flex;
             align-items: center;
@@ -112,18 +112,15 @@
             gap: 8px;
             padding: 12px 0;
         }
-        .mobil-urun-bilgi {
-            flex: 1;
-            padding: 0 4px;
-        }
+        .mobil-urun-bilgi { flex: 1; padding: 0 4px; }
 
         .ikram-urunu { text-decoration: line-through; color: #a0aec0; }
         .ikram-rozeti { background: #e53e3e; color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 6px; }
         
-        .adetButonlari { display: flex; align-items: center; gap: 5px; }
-        .adetButonlari button { border: none; background: #4a5568; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .adetButonlari { display: flex; align-items: center; gap: 4px; }
+        .adetButonlari button { border: none; background: #4a5568; color: white; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; }
         .adetButonlari button:hover { background: #2d3748; }
-        .ikram-btn-mini { background: #718096 !important; color: white !important; border: none; padding: 0 10px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; }
+        .ikram-btn-mini { background: #718096 !important; color: white !important; border: none; padding: 0 9px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .ikram-btn-mini.aktif-ikram { background: #e53e3e !important; }
 
         .iskonto-alan { background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
@@ -143,14 +140,34 @@
         .paket-toplam-girdi-alan label { font-size: 14px; font-weight: bold; color: #2b6cb0; }
         .paket-toplam-girdi-alan input { width: 110px; padding: 6px 10px; border: 2px solid #3182ce; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: right; color: #2b6cb0; outline: none; }
 
+        /* Masaüstü Ödeme Buton Grubu */
+        .pc-odeme-grubu { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-odeme-nakit { flex: 2; padding: 14px 8px; border: none; border-radius: 10px; background: #38a169; color: white; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(56, 161, 105, 0.25); text-align: center; }
+        .btn-odeme-nakit:hover { background: #2f855a; }
+        .btn-odeme-kart { flex: 2; padding: 14px 8px; border: none; border-radius: 10px; background: #3182ce; color: white; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(49, 130, 206, 0.25); text-align: center; }
+        .btn-odeme-kart:hover { background: #2b6cb0; }
+        .btn-odeme-parcali { flex: 1.2; padding: 14px 4px; border: 1.5px solid #cbd5e0; border-radius: 10px; background: #ffffff; color: #4a5568; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; text-align: center; line-height: 1.2; }
+        .btn-odeme-parcali:hover { background: #edf2f7; border-color: #a0aec0; color: #1a202c; }
+
+        /* Mobil Tek Ödeme Butonu */
         .odemeAlindi { width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 10px; background: #38a169; color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 161, 105, 0.2); transition: 0.2s; }
         .odemeAlindi:hover { background: #2f855a; }
+        
         .odeme-secenekleri { display: flex; gap: 15px; margin-top: 20px; }
         .odeme-btn { flex: 1; padding: 20px; border: 2px solid #e2e8f0; border-radius: 12px; background: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; }
         .odeme-btn.nakit { color: #2f855a; border-color: #c6f6d5; }
         .odeme-btn.nakit:hover { background: #f0fff4; }
         .odeme-btn.kart { color: #2b6cb0; border-color: #bee3f8; }
         .odeme-btn.kart:hover { background: #ebf8ff; }
+        
+        /* Parçalı Ödeme Modal Stili */
+        .parcali-kutu { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; }
+        .parcali-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .parcali-satir:last-child { margin-bottom: 0; }
+        .parcali-satir label { font-size: 14px; font-weight: bold; color: #2d3748; }
+        .parcali-satir input { width: 120px; padding: 8px 10px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: right; outline: none; }
+        .parcali-satir input:focus { border-color: #3182ce; }
+
         .detay-liste-alan { flex: 1; overflow-y: auto; margin-bottom: 15px; }
         .detay-tablo { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px; }
         .detay-tablo th, .detay-tablo td { padding: 10px; text-align: left; border-bottom: 1px solid #edf2f7; }
@@ -216,7 +233,7 @@
 </div>
 
 <header>
-    <img src="logo.png" alt="Waffle Tree Logo" class="header-logo" style="display: block;" title="Cihaz Değiştirmek İçin Tıkla" onclick="cihazDegistirMenuAc()">
+    <img src="logo.png" alt="Waffle Tree Logo" class="header-logo" style="display: block;">
     
     <div class="header-ciro-alani">
         <div class="bugun-ciro-kutusu">
@@ -378,7 +395,15 @@
                     <div id="kisiBasiBilgi" class="kisi-basi-bilgi" style="display:none;"></div>
                 </div>
 
-                <button class="odemeAlindi" onclick="odemeAlTetikle()">✓ ÖDEME AL</button>
+                <!-- Bilgisayar Modu Butonları -->
+                <div class="pc-odeme-grubu" id="pcOdemeGrubu">
+                    <button class="btn-odeme-nakit" onclick="hesapKapatHizli('Nakit')">💵 NAKİT</button>
+                    <button class="btn-odeme-kart" onclick="hesapKapatHizli('Kart')">💳 KART</button>
+                    <button class="btn-odeme-parcali" onclick="parcaliOdemeModalAc()">⚖️ Nakit+Kart</button>
+                </div>
+
+                <!-- Mobil Mod Tek Buton -->
+                <button class="odemeAlindi" id="mobilOdemeAlBtn" style="display:none;" onclick="odemeAlTetikle()">✓ ÖDEME AL</button>
             </div>
         </div>
     </div>
@@ -390,6 +415,7 @@
     <button class="mobil-detay-ac-btn" onclick="mobilSepetModalAc()">📋 Sipariş Detayı</button>
 </div>
 
+<!-- Mobil İçin Ödeme Tipi Ekranı -->
 <div id="odemeTipiEkrani" class="modal-overlay">
     <div class="detayKutusu" style="width:400px;">
         <div class="ust">
@@ -401,6 +427,30 @@
             <button class="odeme-btn nakit" onclick="hesapKapat('Nakit')">💵 NAKİT</button>
             <button class="odeme-btn kart" onclick="hesapKapat('Kart')">💳 KART</button>
         </div>
+    </div>
+</div>
+
+<!-- Parçalı (Nakit + Kart) Ödeme Modalı -->
+<div id="parcaliOdemeEkrani" class="modal-overlay">
+    <div class="detayKutusu" style="width:420px;">
+        <div class="ust">
+            <h2>⚖️ Parçalı Ödeme Al</h2>
+            <button class="kapat" onclick="ekraniKapat('parcaliOdemeEkrani')">X</button>
+        </div>
+        <p style="margin:0 0 10px 0; color:#555; font-size:14px;">Masa Toplamı: <strong id="parcaliMasaToplamText" style="color:#2f855a; font-size:17px;">0 ₺</strong></p>
+        
+        <div class="parcali-kutu">
+            <div class="parcali-satir">
+                <label for="parcaliNakitInput">💵 Nakit Tutar:</label>
+                <input type="number" id="parcaliNakitInput" value="0" min="0" oninput="parcaliTutarHesapla('nakit')">
+            </div>
+            <div class="parcali-satir">
+                <label for="parcaliKartInput">💳 Kart Tutar:</label>
+                <input type="number" id="parcaliKartInput" value="0" min="0" oninput="parcaliTutarHesapla('kart')">
+            </div>
+        </div>
+
+        <button class="odemeAlindi" style="background:#2b6cb0; margin-top:5px;" onclick="parcaliOdemeOnayla()">✓ ÖDEMEYİ TAMAMLA</button>
     </div>
 </div>
 
@@ -474,35 +524,27 @@
 
     function cihazSec(tur) {
         secilenCihaz = tur;
-        try { localStorage.setItem('secilen_cihaz', tur); } catch(e){}
         let secimEl = document.getElementById("cihazSecimEkrani");
         if (secimEl) secimEl.style.display = "none";
         
         let sepet = document.getElementById("sepetBolumu");
+        let pcBtnler = document.getElementById("pcOdemeGrubu");
+        let mobBtn = document.getElementById("mobilOdemeAlBtn");
+
         if (secilenCihaz === 'telefon') {
             if (sepet) sepet.style.display = "none";
+            if (pcBtnler) pcBtnler.style.display = "none";
+            if (mobBtn) mobBtn.style.display = "block";
             document.querySelectorAll('.urunler').forEach(el => el.style.gridTemplateColumns = "repeat(2, 1fr)");
         } else {
             if (sepet) sepet.style.display = "flex";
+            if (pcBtnler) pcBtnler.style.display = "flex";
+            if (mobBtn) mobBtn.style.display = "none";
             document.querySelectorAll('.urunler').forEach(el => el.style.gridTemplateColumns = "repeat(3, 1fr)");
         }
-        if (seciliMasa && typeof siparisiGoster === "function") {
-            siparisiGoster();
-        }
-    }
 
-    function cihazDegistirMenuAc() {
-        let secimEl = document.getElementById("cihazSecimEkrani");
-        if (secimEl) secimEl.style.display = "flex";
+        if (seciliMasa) siparisiGoster();
     }
-
-    // Önceden seçilmiş cihaz varsa doğrudan uygula
-    try {
-        let kayitliCihaz = localStorage.getItem('secilen_cihaz');
-        if (kayitliCihaz) {
-            cihazSec(kayitliCihaz);
-        }
-    } catch(e){}
 
     const firebaseConfig = {
         apiKey: "AIzaSyByTCUS0YLTzBZaVSskcV-rLclT0X4-7u8",
@@ -597,15 +639,25 @@
 
         let paketGirdiAlani = document.getElementById("paketToplamGirdiAlan");
         let iskontoBolumu = document.getElementById("iskontoBolumu");
+        let pcBtnler = document.getElementById("pcOdemeGrubu");
 
         if (isPaketKanal) {
             paketGirdiAlani.style.display = "flex";
             iskontoBolumu.style.display = "none";
+            if (pcBtnler) pcBtnler.style.display = "none";
+            document.getElementById("mobilOdemeAlBtn").style.display = "block";
             let kayitliTutar = paketToplamTutarlari[seciliMasa] || 0;
             document.getElementById("topluPaketFiyatiInput").value = kayitliTutar;
         } else {
             paketGirdiAlani.style.display = "none";
             iskontoBolumu.style.display = "block";
+            if (secilenCihaz === 'pc') {
+                if (pcBtnler) pcBtnler.style.display = "flex";
+                document.getElementById("mobilOdemeAlBtn").style.display = "none";
+            } else {
+                if (pcBtnler) pcBtnler.style.display = "none";
+                document.getElementById("mobilOdemeAlBtn").style.display = "block";
+            }
         }
 
         let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
@@ -738,6 +790,16 @@
         siparisiGoster();
     }
 
+    function siparisHesapla() {
+        let siparis = masalar[seciliMasa] || [];
+        let isPaketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
+        if (isPaketKanal) {
+            return paketToplamTutarlari[seciliMasa] || 0;
+        }
+        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+        return hamToplam - (hamToplam * (aktifIskontoOrani / 100));
+    }
+
     function siparisiGoster() {
         let liste = document.getElementById("siparisListesi");
         let siparis = masalar[seciliMasa] || [];
@@ -783,6 +845,7 @@
             let fiyatMetni = isPaketKanal ? '' : (urun.ikramMi ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺ × ${urun.adet}` : `${urun.fiyat} ₺ × ${urun.adet}`);
 
             if (secilenCihaz === 'telefon') {
+                // Mobilde İkram Butonu En Başta
                 html += `
                     <div class="siparisSatiri mobil-satir">
                         ${!isPaketKanal ? `<button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>` : ''}
@@ -800,6 +863,7 @@
                     </div>
                 `;
             } else {
+                // Bilgisayarda Orijinal Düzen
                 html += `
                     <div class="siparisSatiri">
                         <div>
@@ -873,7 +937,7 @@
                         toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
                     }
 
-                    durum.innerText = toplam + " ₺";
+                    durum.innerText = Math.round(toplam) + " ₺";
                     durum.className = "durum-rozeti dolu";
                     if (masaKart) {
                         masaKart.classList.remove("is-bos");
@@ -948,17 +1012,72 @@
         }
     }
 
+    // Bilgisayar modu hızlı Nakit/Kart butonları
+    function hesapKapatHizli(odemeYontemi) {
+        if (!masalar[seciliMasa] || masalar[seciliMasa].length === 0) {
+            alert("Bu masada sipariş bulunmuyor.");
+            return;
+        }
+        hesapKapat(odemeYontemi);
+    }
+
+    // Parçalı Ödeme Modalı
+    function parcaliOdemeModalAc() {
+        if (!masalar[seciliMasa] || masalar[seciliMasa].length === 0) {
+            alert("Bu masada sipariş bulunmuyor.");
+            return;
+        }
+        let toplam = Math.round(siparisHesapla());
+        document.getElementById("parcaliMasaToplamText").innerText = toplam + " ₺";
+        
+        let yari = Math.round(toplam / 2);
+        document.getElementById("parcaliNakitInput").value = yari;
+        document.getElementById("parcaliKartInput").value = toplam - yari;
+        
+        document.getElementById("parcaliOdemeEkrani").style.display = "flex";
+    }
+
+    function parcaliTutarHesapla(kaynak) {
+        let toplam = Math.round(siparisHesapla());
+        let nakitInput = document.getElementById("parcaliNakitInput");
+        let kartInput = document.getElementById("parcaliKartInput");
+
+        if (kaynak === 'nakit') {
+            let nakitVal = parseFloat(nakitInput.value) || 0;
+            if (nakitVal > toplam) { nakitVal = toplam; nakitInput.value = toplam; }
+            kartInput.value = Math.max(0, Math.round(toplam - nakitVal));
+        } else {
+            let kartVal = parseFloat(kartInput.value) || 0;
+            if (kartVal > toplam) { kartVal = toplam; kartInput.value = toplam; }
+            nakitInput.value = Math.max(0, Math.round(toplam - kartVal));
+        }
+    }
+
+    function parcaliOdemeOnayla() {
+        let toplam = Math.round(siparisHesapla());
+        let nakit = parseFloat(document.getElementById("parcaliNakitInput").value) || 0;
+        let kart = parseFloat(document.getElementById("parcaliKartInput").value) || 0;
+
+        if (Math.round(nakit + kart) !== toplam) {
+            alert(`Nakit ve Kart toplamı (${nakit + kart} ₺), masa toplamına (${toplam} ₺) eşit olmalıdır!`);
+            return;
+        }
+
+        hesapKapatDetayli(nakit, kart);
+        ekraniKapat('parcaliOdemeEkrani');
+    }
+
     function hesapKapat(odemeYontemi) {
+        let odenecekTutar = siparisHesapla();
+        let nakitTutar = (odemeYontemi === 'Nakit') ? odenecekTutar : 0;
+        let kartTutar = (odemeYontemi === 'Kart') ? odenecekTutar : 0;
+        hesapKapatDetayli(nakitTutar, kartTutar);
+    }
+
+    function hesapKapatDetayli(nakitTutar, kartTutar) {
         let siparis = masalar[seciliMasa];
         let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2');
-        let odenecekTutar = 0;
-
-        if (isPaket) {
-            odenecekTutar = paketToplamTutarlari[seciliMasa] || 0;
-        } else {
-            let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
-            odenecekTutar = hamToplam - (hamToplam * (aktifIskontoOrani / 100));
-        }
+        let odenecekTutar = isPaket ? (paketToplamTutarlari[seciliMasa] || 0) : (nakitTutar + kartTutar);
 
         let hedefSatisObjesi = isPaket ? bugunPaketUrunSatis : bugunUrunSatis;
         let masaUrunOzet = [];
@@ -989,11 +1108,16 @@
             });
         } else {
             bugunToplamCiro += odenecekTutar;
-            if (odemeYontemi === 'Nakit') bugunNakitCiro += odenecekTutar;
-            else if (odemeYontemi === 'Kart') bugunKartCiro += odenecekTutar;
+            bugunNakitCiro += nakitTutar;
+            bugunKartCiro += kartTutar;
+
+            let odemeSekliNot = "";
+            if (nakitTutar > 0 && kartTutar > 0) odemeSekliNot = ` (${Math.round(nakitTutar)} ₺ Nakit + ${Math.round(kartTutar)} ₺ Kart)`;
+            else if (nakitTutar > 0) odemeSekliNot = " (Nakit)";
+            else odemeSekliNot = " (Kart)";
 
             bugunMasaDetaylari.push({
-                masaAdi: masaIsmi,
+                masaAdi: masaIsmi + odemeSekliNot,
                 harcama: odenecekTutar,
                 saat: saatStr,
                 urunlerDetay: masaUrunOzet.join(", ")
@@ -1002,7 +1126,7 @@
 
         bugunVerileriniKaydet();
 
-        alert(`${masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa)} ödemesi alındı.\nTutar: ${odenecekTutar.toFixed(0)} ₺`);
+        alert(`${masaIsmi} ödemesi alındı.\nTutar: ${Math.round(odenecekTutar)} ₺`);
 
         masalar[seciliMasa] = [];
         delete masaIsimleri[seciliMasa];
@@ -1025,9 +1149,9 @@
     }
 
     function bugunCirosunuGuncelle() {
-        document.getElementById("bugunCiro").innerText = bugunToplamCiro.toFixed(0);
-        document.getElementById("bugunPaketCiro").innerText = bugunPaketToplamCiro.toFixed(0);
-        document.getElementById("bugunOdemeKanalVal").innerText = `${bugunNakitCiro.toFixed(0)} ₺ Nakit / ${bugunKartCiro.toFixed(0)} ₺ Kart`;
+        document.getElementById("bugunCiro").innerText = Math.round(bugunToplamCiro);
+        document.getElementById("bugunPaketCiro").innerText = Math.round(bugunPaketToplamCiro);
+        document.getElementById("bugunOdemeKanalVal").innerText = `${Math.round(bugunNakitCiro)} ₺ Nakit / ${Math.round(bugunKartCiro)} ₺ Kart`;
         analizleriGuncelle();
     }
 
@@ -1049,7 +1173,7 @@
             }
         });
         
-        document.getElementById("aylikCiroVal").innerText = `Masa: ${aylikMasaToplam.toFixed(0)} ₺ | Paket: ${aylikPaketToplam.toFixed(0)} ₺`;
+        document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
 
         let tumUrunler = { ...bugunUrunSatis, ...bugunPaketUrunSatis };
         gecmisGunler.forEach(gun => {
@@ -1088,10 +1212,10 @@
 
         let html = "";
         gecmisGunler.forEach((gun) => {
-            let nakit = gun.nakit || 0;
-            let kart = gun.kart || 0;
-            let pCiro = gun.paketCiro || 0;
-            let mCiro = gun.ciro || 0;
+            let nakit = Math.round(gun.nakit || 0);
+            let kart = Math.round(gun.kart || 0);
+            let pCiro = Math.round(gun.paketCiro || 0);
+            let mCiro = Math.round(gun.ciro || 0);
             
             html += `
                 <div class="gecmis-satir">
@@ -1121,7 +1245,7 @@
 
         let bugunTarih = new Date().toLocaleDateString('tr-TR');
 
-        if (confirm(`Bugünü (${bugunTarih}) aktarmak istiyor musunuz?\nMasa Cirosu: ${bugunToplamCiro} ₺\nPaket Cirosu: ${bugunPaketToplamCiro} ₺`)) {
+        if (confirm(`Bugünü (${bugunTarih}) aktarmak istiyor musunuz?\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺`)) {
             
             let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
 
@@ -1310,7 +1434,7 @@
                         <td><strong>${item.masaAdi || '-'}</strong></td>
                         <td style="font-size:12px; color:#555;">${item.urunlerDetay || '-'}</td>
                         <td style="font-size:12px; color:#777;">${item.saat || '-'}</td>
-                        <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
+                        <td style="text-align:right; font-weight:600;">${Math.round(harcama)} ₺</td>
                     </tr>
                 `;
             });
@@ -1318,7 +1442,7 @@
             tbody.innerHTML += `
                 <tr style="background:#e6fffa; color:#234e52; font-weight:800; font-size:15px; border-top:2px solid #319795;">
                     <td colspan="3">GENEL MASA TOPLAMI</td>
-                    <td style="text-align:right;">${genelMasaToplam.toFixed(0)} ₺</td>
+                    <td style="text-align:right;">${Math.round(genelMasaToplam)} ₺</td>
                 </tr>
             `;
         }
@@ -1351,7 +1475,7 @@
                         <td><strong>${item.masaAdi || '-'}</strong></td>
                         <td style="font-size:12px; color:#555;">${item.urunlerDetay || '-'}</td>
                         <td style="font-size:12px; color:#777;">${item.saat || '-'}</td>
-                        <td style="text-align:right; font-weight:600;">${harcama.toFixed(0)} ₺</td>
+                        <td style="text-align:right; font-weight:600;">${Math.round(harcama)} ₺</td>
                     </tr>
                 `;
             });
@@ -1359,7 +1483,7 @@
             tbody.innerHTML += `
                 <tr style="background:#ebf8ff; color:#2b6cb0; font-weight:800; font-size:15px; border-top:2px solid #3182ce;">
                     <td colspan="3">GENEL PAKET TOPLAMI</td>
-                    <td style="text-align:right;">${genelPaketToplam.toFixed(0)} ₺</td>
+                    <td style="text-align:right;">${Math.round(genelPaketToplam)} ₺</td>
                 </tr>
             `;
         }
