@@ -84,7 +84,7 @@
         .masa.is-bos::before { background: #38a169; }
         .bos { background: #edf7ed; color: #2e7d32; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; z-index: 2000; }
         .siparisKutusu { background: white; width: 1100px; max-width: 100%; height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .detayKutusu { background: white; width: 750px; max-width: 100%; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .buyukDetayKutusu { background: white; width: 1100px; max-width: 95%; height: 90vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
@@ -473,8 +473,8 @@
     </div>
 </div>
 
-<!-- Genel Detay Ekranı -->
-<div id="detayEkrani" class="modal-overlay">
+<!-- Genel Detay Ekranı (z-index 3500 ile en üstte açılır) -->
+<div id="detayEkrani" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu">
         <div class="ust">
             <h2 id="detayBaslik">Satış Detayı</h2>
@@ -529,8 +529,8 @@
     </div>
 </div>
 
-<!-- GEÇMİŞ GÜNÜ DÜZENLE MODALI -->
-<div id="gecmisDuzenleModal" class="modal-overlay">
+<!-- GEÇMİŞ GÜNÜ DÜZENLE MODALI (z-index 3500) -->
+<div id="gecmisDuzenleModal" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu" style="width:420px;">
         <div class="ust">
             <h2 id="duzenleModalBaslik">Günü Düzenle</h2>
@@ -1234,14 +1234,17 @@
         
         document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
 
-        // En çok satan ürün hesaplama (temiz referans)
+        // En çok satan ürün (uçuk/hatalı eski adetleri filtreler)
         let tumUrunler = {};
         function urunSay(obj) {
             if (!obj) return;
             for (let u in obj) {
                 let ad = u.replace(" (İkram)", "");
+                let adet = Number(obj[u].adet || 0);
+                // 250'den büyük absürt eski kayıtları filtrele
+                if (adet > 250) continue;
                 if (!tumUrunler[ad]) tumUrunler[ad] = 0;
-                tumUrunler[ad] += Number(obj[u].adet || 0);
+                tumUrunler[ad] += adet;
             }
         }
 
@@ -1336,17 +1339,33 @@
         });
     }
 
+    // Gece 00:00 - 05:00 arası otomatik olarak dünün tarihini önerir
+    function varsayilanKapanisTarihiGetir() {
+        let simdi = new Date();
+        let saat = simdi.getHours();
+        
+        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır
+        if (saat < 5) {
+            simdi.setDate(simdi.getDate() - 1);
+        }
+        return simdi.toLocaleDateString('tr-TR');
+    }
+
     function gunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
             alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
             return;
         }
 
-        let bugunTarih = new Date().toLocaleDateString('tr-TR');
+        let varsayilanTarih = varsayilanKapanisTarihiGetir();
+        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (Gece saatlerinde otomatik dünün tarihi önerilir):", varsayilanTarih);
 
-        if (confirm(`Bugünü (${bugunTarih}) aktarmak istiyor musunuz?\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺`)) {
+        if (!secilenTarih) return;
+        secilenTarih = secilenTarih.trim();
+
+        if (confirm(`${secilenTarih} tarihine aktarılıyor:\n\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺\n\nOnaylıyor musunuz?`)) {
             
-            let mevcutGun = gecmisGunler.find(g => g.tarih === bugunTarih);
+            let mevcutGun = gecmisGunler.find(g => g.tarih === secilenTarih);
 
             if (mevcutGun) {
                 let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
@@ -1374,13 +1393,13 @@
                     urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
                 }).then(() => {
                     sifirlaVeKaydet();
-                    alert(`${bugunTarih} tarihli mevcut kaydın üzerine eklendi!`);
+                    alert(`${secilenTarih} tarihli mevcut kaydın üzerine eklendi!`);
                 });
 
             } else {
                 let tarihIso = new Date().toISOString();
                 db.collection("gecmis").add({
-                    tarih: bugunTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
+                    tarih: secilenTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
                     nakit: bugunNakitCiro, kart: bugunKartCiro, 
                     urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
                     paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
@@ -1388,7 +1407,7 @@
                     paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
                 }).then(() => {
                     sifirlaVeKaydet();
-                    alert("Gün başarıyla aktarıldı!");
+                    alert(`${secilenTarih} tarihiyle gün başarıyla aktarıldı!`);
                 });
             }
         }
@@ -1474,10 +1493,14 @@
         function temizTopla(obj) {
             if (!obj) return;
             for (let u in obj) {
+                let adet = Number(obj[u].adet || 0);
+                // Eski katlanmış saçma kayıtları filtreler (250 adetten fazlaysa göstermez)
+                if (adet > 250) continue;
+
                 if (!birlesikUrunler[u]) {
                     birlesikUrunler[u] = { adet: 0, fiyat: Number(obj[u].fiyat || 0) };
                 }
-                birlesikUrunler[u].adet += Number(obj[u].adet || 0);
+                birlesikUrunler[u].adet += adet;
             }
         }
 
