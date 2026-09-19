@@ -15,7 +15,7 @@
         
         /* Cihaz Seçim Ekranı Overlay */
         #cihazSecimEkrani {
-            position: fixed; inset: 0; background: #1e2025; z-index: 9999;
+            position: fixed; inset: 0; background: #1e2025; z-index: 99999;
             display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 25px;
         }
         #cihazSecimEkrani h1 { color: white; font-size: 26px; margin-bottom: 10px; }
@@ -24,8 +24,10 @@
             background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.2);
             color: white; padding: 25px 40px; border-radius: 16px; font-size: 20px; font-weight: bold;
             cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        .cihaz-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); }
+        .cihaz-btn span { pointer-events: none; }
+        .cihaz-btn:hover, .cihaz-btn:active { background: rgba(255, 255, 255, 0.25); transform: translateY(-3px); }
 
         /* Header */
         header { 
@@ -33,7 +35,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
         }
         
-        .header-logo { max-height: 40px; width: auto; object-fit: contain; }
+        .header-logo { max-height: 40px; width: auto; object-fit: contain; cursor: pointer; }
         .header-ciro-alani { display: flex; gap: 12px; }
 
         .bugun-ciro-kutusu { 
@@ -102,13 +104,26 @@
         .siparisListesi { flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 5px; }
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: 14px; }
         
+        /* Mobil satır düzenlemesi */
+        .siparisSatiri.mobil-satir {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 12px 0;
+        }
+        .mobil-urun-bilgi {
+            flex: 1;
+            padding: 0 4px;
+        }
+
         .ikram-urunu { text-decoration: line-through; color: #a0aec0; }
         .ikram-rozeti { background: #e53e3e; color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-left: 6px; }
         
-        .adetButonlari { display: flex; align-items: center; gap: 3px; }
-        .adetButonlari button { border: none; background: #4a5568; color: white; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .adetButonlari { display: flex; align-items: center; gap: 5px; }
+        .adetButonlari button { border: none; background: #4a5568; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .adetButonlari button:hover { background: #2d3748; }
-        .ikram-btn-mini { background: #718096 !important; color: white !important; border: none; padding: 0 8px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .ikram-btn-mini { background: #718096 !important; color: white !important; border: none; padding: 0 10px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; }
         .ikram-btn-mini.aktif-ikram { background: #e53e3e !important; }
 
         .iskonto-alan { background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
@@ -201,7 +216,7 @@
 </div>
 
 <header>
-    <img src="logo.png" alt="Waffle Tree Logo" class="header-logo" style="display: block;">
+    <img src="logo.png" alt="Waffle Tree Logo" class="header-logo" style="display: block;" title="Cihaz Değiştirmek İçin Tıkla" onclick="cihazDegistirMenuAc()">
     
     <div class="header-ciro-alani">
         <div class="bugun-ciro-kutusu">
@@ -438,23 +453,10 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyByTCUS0YLTzBZaVSskcV-rLclT0X4-7u8",
-        authDomain: "waffletree-f58fd.firebaseapp.com",
-        projectId: "waffletree-f58fd",
-        storageBucket: "waffletree-f58fd.firebasestorage.app",
-        messagingSenderId: "768349130026",
-        appId: "1:768349130026:web:e2256c7612f8be88d8e253",
-        measurementId: "G-XMJNNDHW4K"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     let seciliMasa = null;
     let masalar = {};
     let masaIsimleri = {};
-    let paketToplamTutarlari = {}; // p1 ve p2 için toplu tutarı saklar
+    let paketToplamTutarlari = {}; 
     let bugunToplamCiro = 0;
     let bugunPaketToplamCiro = 0;
     let bugunNakitCiro = 0;
@@ -472,17 +474,48 @@
 
     function cihazSec(tur) {
         secilenCihaz = tur;
-        document.getElementById("cihazSecimEkrani").style.display = "none";
+        try { localStorage.setItem('secilen_cihaz', tur); } catch(e){}
+        let secimEl = document.getElementById("cihazSecimEkrani");
+        if (secimEl) secimEl.style.display = "none";
         
         let sepet = document.getElementById("sepetBolumu");
         if (secilenCihaz === 'telefon') {
-            sepet.style.display = "none";
+            if (sepet) sepet.style.display = "none";
             document.querySelectorAll('.urunler').forEach(el => el.style.gridTemplateColumns = "repeat(2, 1fr)");
         } else {
-            sepet.style.display = "flex";
+            if (sepet) sepet.style.display = "flex";
             document.querySelectorAll('.urunler').forEach(el => el.style.gridTemplateColumns = "repeat(3, 1fr)");
         }
+        if (seciliMasa && typeof siparisiGoster === "function") {
+            siparisiGoster();
+        }
     }
+
+    function cihazDegistirMenuAc() {
+        let secimEl = document.getElementById("cihazSecimEkrani");
+        if (secimEl) secimEl.style.display = "flex";
+    }
+
+    // Önceden seçilmiş cihaz varsa doğrudan uygula
+    try {
+        let kayitliCihaz = localStorage.getItem('secilen_cihaz');
+        if (kayitliCihaz) {
+            cihazSec(kayitliCihaz);
+        }
+    } catch(e){}
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyByTCUS0YLTzBZaVSskcV-rLclT0X4-7u8",
+        authDomain: "waffletree-f58fd.firebaseapp.com",
+        projectId: "waffletree-f58fd",
+        storageBucket: "waffletree-f58fd.firebasestorage.app",
+        messagingSenderId: "768349130026",
+        appId: "1:768349130026:web:e2256c7612f8be88d8e253",
+        measurementId: "G-XMJNNDHW4K"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     function varsayilanIsimGetir(key) {
         if (key === '12') return "Take Away Paket";
@@ -749,20 +782,39 @@
 
             let fiyatMetni = isPaketKanal ? '' : (urun.ikramMi ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺ × ${urun.adet}` : `${urun.fiyat} ₺ × ${urun.adet}`);
 
-            html += `
-                <div class="siparisSatiri">
-                    <div>
-                        ${urunMetni}<br>
-                        ${fiyatMetni}
-                    </div>
-                    <div class="adetButonlari">
+            if (secilenCihaz === 'telefon') {
+                html += `
+                    <div class="siparisSatiri mobil-satir">
                         ${!isPaketKanal ? `<button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>` : ''}
-                        <button onclick="adetDegistir(${index},-1)">-</button>
-                        <button onclick="adetDegistir(${index},1)">+</button>
-                        ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
+                        
+                        <div class="mobil-urun-bilgi">
+                            ${urunMetni}<br>
+                            ${fiyatMetni}
+                        </div>
+                        
+                        <div class="adetButonlari">
+                            <button onclick="adetDegistir(${index},-1)">-</button>
+                            <button onclick="adetDegistir(${index},1)">+</button>
+                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                html += `
+                    <div class="siparisSatiri">
+                        <div>
+                            ${urunMetni}<br>
+                            ${fiyatMetni}
+                        </div>
+                        <div class="adetButonlari">
+                            ${!isPaketKanal ? `<button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>` : ''}
+                            <button onclick="adetDegistir(${index},-1)">-</button>
+                            <button onclick="adetDegistir(${index},1)">+</button>
+                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
+                        </div>
+                    </div>
+                `;
+            }
         });
 
         liste.innerHTML = html;
