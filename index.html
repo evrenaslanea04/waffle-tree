@@ -67,7 +67,7 @@
         .masalar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px; }
         .paketler { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
         
-        .masa { background: #ffffff; border-radius: 16px; padding: 20px 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e4e9; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+        .masa { background: #ffffff; border-radius: 16px; padding: 20px 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e4e9; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
         .masa::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #e0e0e0; transition: background 0.3s; }
         .masa:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: #cbd0d8; }
         .masa h2 { margin: 5px 0 10px 0; font-size: 18px; color: #2c3036; font-weight: 700; word-break: break-word; }
@@ -1339,18 +1339,87 @@
         });
     }
 
-    // Gece 00:00 - 05:00 arası otomatik olarak dünün tarihini önerir
+    // Gece 00:00 - 05:00 arası otomatik olarak dünün tarihini önerir/alır
     function varsayilanKapanisTarihiGetir() {
         let simdi = new Date();
         let saat = simdi.getHours();
         
-        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır
+        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır (Örn: Cuma öğlen açılan dükkan için Cumartesi 01:00'de Cuma'nın tarihi döner)
         if (saat < 5) {
             simdi.setDate(simdi.getDate() - 1);
         }
         return simdi.toLocaleDateString('tr-TR');
     }
 
+    // Gece 01:00 Otomatik Kapanış Fonksiyonu (Soru sormadan sessizce geçmişe aktarır)
+    function otomatikGunuBitir() {
+        if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) return;
+
+        let secilenTarih = varsayilanKapanisTarihiGetir();
+        let mevcutGun = gecmisGunler.find(g => g.tarih === secilenTarih);
+
+        if (mevcutGun) {
+            let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
+            let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
+            let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
+            let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
+            
+            let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
+            for (let urunAdi in bugunUrunSatis) {
+                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: bugunUrunSatis[urunAdi].fiyat || 0 };
+                yeniUrunler[urunAdi].adet = Number(yeniUrunler[urunAdi].adet || 0) + Number(bugunUrunSatis[urunAdi].adet || 0);
+            }
+
+            let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
+            for (let urunAdi in bugunPaketUrunSatis) {
+                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: bugunPaketUrunSatis[urunAdi].fiyat || 0 };
+                yeniPaketUrunler[urunAdi].adet = Number(yeniPaketUrunler[urunAdi].adet || 0) + Number(bugunPaketUrunSatis[urunAdi].adet || 0);
+            }
+
+            let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
+            let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
+
+            db.collection("gecmis").doc(mevcutGun.id).update({
+                ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
+                urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
+            }).then(() => {
+                sifirlaVeKaydet();
+                console.log(`[Otomatik Gece Kapanışı 01:00] ${secilenTarih} tarihli kaydın üzerine eklendi.`);
+            });
+
+        } else {
+            let tarihIso = new Date().toISOString();
+            db.collection("gecmis").add({
+                tarih: secilenTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
+                nakit: bugunNakitCiro, kart: bugunKartCiro, 
+                urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
+                paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
+                masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
+                paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
+            }).then(() => {
+                sifirlaVeKaydet();
+                console.log(`[Otomatik Gece Kapanışı 01:00] ${secilenTarih} tarihiyle gün aktarıldı.`);
+            });
+        }
+    }
+
+    // Gece 01:00 Otomatik Kapanış Kontrol Motoru (Her 30 saniyede bir kontrol eder)
+    setInterval(() => {
+        let simdi = new Date();
+        // Gece 01:00 ile 01:30 arasında çalışır
+        if (simdi.getHours() === 1 && simdi.getMinutes() <= 30) {
+            let takvimBugun = simdi.toLocaleDateString('tr-TR');
+            let sonKapanis = localStorage.getItem("wt_son_otomatik_kapanis");
+            
+            // Bu gece henüz kapanış yapılmadıysa ve ciro varsa otomatik günü bitir
+            if (sonKapanis !== takvimBugun && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
+                localStorage.setItem("wt_son_otomatik_kapanis", takvimBugun);
+                otomatikGunuBitir();
+            }
+        }
+    }, 30000);
+
+    // Manuel Günü Bitir Fonksiyonu
     function gunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
             alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
