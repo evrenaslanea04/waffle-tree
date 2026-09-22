@@ -797,19 +797,23 @@
         let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
 
         if (mevcutUrun) {
-            mevcutUrun.adet++;
+            mevcutUrun.adet = (parseInt(mevcutUrun.adet, 10) || 0) + 1;
         } else {
-            siparis.push({ ad: urunAdi, fiyat: fiyat, adet: 1, ikramMi: false });
+            siparis.push({ ad: urunAdi, fiyat: Number(fiyat), adet: 1, ikramMi: false });
         }
         masalariKaydet();
     }
 
     function adetDegistir(index, miktar) {
         let siparis = masalar[seciliMasa];
-        if (!siparis) return;
+        if (!siparis || !siparis[index]) return;
         
-        siparis[index].adet += miktar;
-        if (siparis[index].adet <= 0) siparis.splice(index, 1);
+        let yeniAdet = (parseInt(siparis[index].adet, 10) || 0) + parseInt(miktar, 10);
+        if (yeniAdet <= 0) {
+            siparis.splice(index, 1);
+        } else {
+            siparis[index].adet = yeniAdet;
+        }
         masalariKaydet();
     }
 
@@ -859,7 +863,7 @@
         if (isPaketKanal) {
             return paketToplamTutarlari[seciliMasa] || 0;
         }
-        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+        let hamToplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat || 0)) * (parseInt(urun.adet, 10) || 0)), 0);
         return hamToplam - (hamToplam * (aktifIskontoOrani / 100));
     }
 
@@ -874,7 +878,7 @@
             if (varOlanBadge) btn.removeChild(varOlanBadge);
 
             let urunGrup = siparis.filter(u => u.ad === ad);
-            let toplamAdet = urunGrup.reduce((s, u) => s + u.adet, 0);
+            let toplamAdet = urunGrup.reduce((s, u) => s + (parseInt(u.adet, 10) || 0), 0);
 
             if (toplamAdet > 0) {
                 let badge = document.createElement('span');
@@ -897,15 +901,16 @@
         let hamMasaToplam = 0;
 
         siparis.forEach((urun, index) => {
-            let urunFiyati = urun.ikramMi ? 0 : urun.fiyat;
-            let araToplam = urunFiyati * urun.adet;
+            let uAdet = parseInt(urun.adet, 10) || 1;
+            let urunFiyati = urun.ikramMi ? 0 : Number(urun.fiyat || 0);
+            let araToplam = urunFiyati * uAdet;
             hamMasaToplam += araToplam;
 
             let urunMetni = urun.ikramMi 
                 ? `<span class="ikram-urunu">${urun.ad}</span> <span class="ikram-rozeti">[İKRAM]</span>` 
                 : `<strong>${urun.ad}</strong>`;
 
-            let fiyatMetni = isPaketKanal ? '' : (urun.ikramMi ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺ × ${urun.adet}` : `${urun.fiyat} ₺ × ${urun.adet}`);
+            let fiyatMetni = isPaketKanal ? '' : (urun.ikramMi ? `<span style="text-decoration:line-through; color:#999;">${urun.fiyat} ₺</span> 0 ₺ × ${uAdet}` : `${urun.fiyat} ₺ × ${uAdet}`);
 
             if (secilenCihaz === 'telefon') {
                 html += `
@@ -920,7 +925,7 @@
                         <div class="adetButonlari">
                             <button onclick="adetDegistir(${index},-1)">-</button>
                             <button onclick="adetDegistir(${index},1)">+</button>
-                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
+                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${uAdet} adet</span>`}
                         </div>
                     </div>
                 `;
@@ -935,7 +940,7 @@
                             ${!isPaketKanal ? `<button class="ikram-btn-mini ${urun.ikramMi ? 'aktif-ikram' : ''}" onclick="urunIkramToggle(${index})" title="İkram Yap">🎁 İkram</button>` : ''}
                             <button onclick="adetDegistir(${index},-1)">-</button>
                             <button onclick="adetDegistir(${index},1)">+</button>
-                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${urun.adet} adet</span>`}
+                            ${!isPaketKanal ? `<span style="min-width:45px; text-align:right; font-weight:bold;">${araToplam} ₺</span>` : `<span style="min-width:35px; text-align:right; font-weight:bold;">${uAdet} adet</span>`}
                         </div>
                     </div>
                 `;
@@ -995,7 +1000,7 @@
                     if (isPaketKanal) {
                         toplam = paketToplamTutarlari[key] || 0;
                     } else {
-                        toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : urun.fiyat) * urun.adet), 0);
+                        toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat || 0)) * (parseInt(urun.adet, 10) || 0)), 0);
                     }
 
                     durum.innerText = Math.round(toplam) + " ₺";
@@ -1143,14 +1148,17 @@
 
         siparis.forEach(urun => {
             let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
+            let urunAdedi = parseInt(urun.adet, 10) || 1;
             
             if (!hedefSatisObjesi[urunAdi]) {
-                hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: (urun.ikramMi ? 0 : urun.fiyat) };
+                hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: (urun.ikramMi ? 0 : Number(urun.fiyat || 0)) };
             }
-            hedefSatisObjesi[urunAdi].adet = (hedefSatisObjesi[urunAdi].adet || 0) + Number(urun.adet);
-            hedefSatisObjesi[urunAdi].fiyat = (urun.ikramMi ? 0 : urun.fiyat);
+            // Sayısal toplama garanti altına alındı
+            let mevcutAdet = parseInt(hedefSatisObjesi[urunAdi].adet, 10) || 0;
+            hedefSatisObjesi[urunAdi].adet = mevcutAdet + urunAdedi;
+            hedefSatisObjesi[urunAdi].fiyat = (urun.ikramMi ? 0 : Number(urun.fiyat || 0));
 
-            masaUrunOzet.push(`${urun.adet}x ${urunAdi}`);
+            masaUrunOzet.push(`${urunAdedi}x ${urunAdi}`);
         });
 
         let simdi = new Date();
@@ -1234,15 +1242,19 @@
         
         document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
 
-        // En çok satan ürün (uçuk/hatalı eski adetleri filtreler)
+        // En çok satan ürün hesabı (tüm adetler güvenle toplanır)
         let tumUrunler = {};
         function urunSay(obj) {
             if (!obj) return;
             for (let u in obj) {
-                let ad = u.replace(" (İkram)", "");
-                let adet = Number(obj[u].adet || 0);
-                // 250'den büyük absürt eski kayıtları filtrele
-                if (adet > 250) continue;
+                let ad = u.replace(" (İkram)", "").trim();
+                let item = obj[u];
+                let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
+                adet = isNaN(adet) ? 0 : adet;
+
+                // Eski hatalı aşırı kayıtları filtrele
+                if (adet > 300) continue;
+
                 if (!tumUrunler[ad]) tumUrunler[ad] = 0;
                 tumUrunler[ad] += adet;
             }
@@ -1344,7 +1356,7 @@
         let simdi = new Date();
         let saat = simdi.getHours();
         
-        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır (Örn: Cuma öğlen açılan dükkan için Cumartesi 01:00'de Cuma'nın tarihi döner)
+        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır (Örn: Cuma günü öğlen açılan dükkan için Cumartesi 01:00'de Cuma tarihi döner)
         if (saat < 5) {
             simdi.setDate(simdi.getDate() - 1);
         }
@@ -1366,14 +1378,22 @@
             
             let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
             for (let urunAdi in bugunUrunSatis) {
-                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: bugunUrunSatis[urunAdi].fiyat || 0 };
-                yeniUrunler[urunAdi].adet = Number(yeniUrunler[urunAdi].adet || 0) + Number(bugunUrunSatis[urunAdi].adet || 0);
+                let eklenecekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
+                let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
+
+                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
+                yeniUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
             }
 
             let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
             for (let urunAdi in bugunPaketUrunSatis) {
-                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: bugunPaketUrunSatis[urunAdi].fiyat || 0 };
-                yeniPaketUrunler[urunAdi].adet = Number(yeniPaketUrunler[urunAdi].adet || 0) + Number(bugunPaketUrunSatis[urunAdi].adet || 0);
+                let eklenecekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
+                let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
+
+                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
+                yeniPaketUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
             }
 
             let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
@@ -1406,12 +1426,12 @@
     // Gece 01:00 Otomatik Kapanış Kontrol Motoru (Her 30 saniyede bir kontrol eder)
     setInterval(() => {
         let simdi = new Date();
-        // Gece 01:00 ile 01:30 arasında çalışır
+        // Gece 01:00 ile 01:30 arasında kontrol eder
         if (simdi.getHours() === 1 && simdi.getMinutes() <= 30) {
             let takvimBugun = simdi.toLocaleDateString('tr-TR');
             let sonKapanis = localStorage.getItem("wt_son_otomatik_kapanis");
             
-            // Bu gece henüz kapanış yapılmadıysa ve ciro varsa otomatik günü bitir
+            // Bu gece henüz kapanış yapılmadıysa ve aktarılacak ciro varsa çalıştır
             if (sonKapanis !== takvimBugun && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
                 localStorage.setItem("wt_son_otomatik_kapanis", takvimBugun);
                 otomatikGunuBitir();
@@ -1444,14 +1464,22 @@
                 
                 let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
                 for (let urunAdi in bugunUrunSatis) {
-                    if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: bugunUrunSatis[urunAdi].fiyat || 0 };
-                    yeniUrunler[urunAdi].adet = Number(yeniUrunler[urunAdi].adet || 0) + Number(bugunUrunSatis[urunAdi].adet || 0);
+                    let eklenecekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
+                    let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
+
+                    if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                    let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
+                    yeniUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
                 }
 
                 let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
                 for (let urunAdi in bugunPaketUrunSatis) {
-                    if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: bugunPaketUrunSatis[urunAdi].fiyat || 0 };
-                    yeniPaketUrunler[urunAdi].adet = Number(yeniPaketUrunler[urunAdi].adet || 0) + Number(bugunPaketUrunSatis[urunAdi].adet || 0);
+                    let eklenecekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
+                    let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
+
+                    if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                    let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
+                    yeniPaketUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
                 }
 
                 let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
@@ -1502,15 +1530,27 @@
 
         if (silinecekGun.urunler) {
             for (let urunAdi in silinecekGun.urunler) {
-                if (!bugunUrunSatis[urunAdi]) bugunUrunSatis[urunAdi] = { adet: 0, fiyat: silinecekGun.urunler[urunAdi].fiyat || 0 };
-                bugunUrunSatis[urunAdi].adet = Number(bugunUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.urunler[urunAdi].adet || 0);
+                let item = silinecekGun.urunler[urunAdi];
+                let adet = typeof item === 'object' ? (parseInt(item.adet, 10) || 0) : (parseInt(item, 10) || 0);
+                let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
+
+                if (!bugunUrunSatis[urunAdi]) bugunUrunSatis[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
+                bugunUrunSatis[urunAdi].adet = mevAdet + adet;
+                bugunUrunSatis[urunAdi].fiyat = fiyat;
             }
         }
 
         if (silinecekGun.paketUrunler) {
             for (let urunAdi in silinecekGun.paketUrunler) {
-                if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = { adet: 0, fiyat: silinecekGun.paketUrunler[urunAdi].fiyat || 0 };
-                bugunPaketUrunSatis[urunAdi].adet = Number(bugunPaketUrunSatis[urunAdi].adet || 0) + Number(silinecekGun.paketUrunler[urunAdi].adet || 0);
+                let item = silinecekGun.paketUrunler[urunAdi];
+                let adet = typeof item === 'object' ? (parseInt(item.adet, 10) || 0) : (parseInt(item, 10) || 0);
+                let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
+
+                if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
+                bugunPaketUrunSatis[urunAdi].adet = mevAdet + adet;
+                bugunPaketUrunSatis[urunAdi].fiyat = fiyat;
             }
         }
 
@@ -1553,6 +1593,7 @@
         }
     }
 
+    // Geçmiş Detay Tablosu - Temizlenmiş ve Adetleri Düzeltilmiş Fonksiyon
     function gecmisDetayGosterDoc(docId) {
         let gun = gecmisGunler.find(g => g.id === docId);
         if (!gun) return;
@@ -1562,14 +1603,20 @@
         function temizTopla(obj) {
             if (!obj) return;
             for (let u in obj) {
-                let adet = Number(obj[u].adet || 0);
-                // Eski katlanmış saçma kayıtları filtreler (250 adetten fazlaysa göstermez)
-                if (adet > 250) continue;
+                let item = obj[u];
+                let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
+                let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
+                
+                adet = isNaN(adet) ? 0 : adet;
+
+                // Geçmişteki 300'ü aşan saçma/bozuk kayıtları eler
+                if (adet > 300 || adet <= 0) continue;
 
                 if (!birlesikUrunler[u]) {
-                    birlesikUrunler[u] = { adet: 0, fiyat: Number(obj[u].fiyat || 0) };
+                    birlesikUrunler[u] = { adet: 0, fiyat: fiyat };
                 }
                 birlesikUrunler[u].adet += adet;
+                if (fiyat > 0) birlesikUrunler[u].fiyat = fiyat;
             }
         }
 
@@ -1595,7 +1642,7 @@
             let genelToplam = 0;
             for (let urunAdi in urunler) {
                 let item = urunler[urunAdi];
-                let adet = Number(item.adet || 0);
+                let adet = parseInt(item.adet, 10) || 0;
                 let fiyat = Number(item.fiyat || 0);
                 let toplamTutar = adet * fiyat;
                 genelToplam += toplamTutar;
