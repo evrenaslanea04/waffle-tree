@@ -59,8 +59,13 @@
         }
         .gecmis-ac-header-btn:hover { background: #2d3748; }
 
+        .vardiya-bilgi-bar {
+            background: #2d3748; color: #e2e8f0; font-size: 12px; padding: 4px 15px;
+            border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+        }
+
         .ana-konteyner { max-width: 1300px; margin: 0 auto; padding: 25px 30px; }
-        .bolum-baslik { font-size: 18px; font-weight: 700; color: #2c3036; margin: 10px 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e4e9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bolum-baslik { font-size: 18px; font-weight: 700; color: #2c3036; margin: 10px 0 15px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e4e9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .masalar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px; }
         .paketler { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
@@ -96,7 +101,7 @@
         .tasima-btn:hover { background: #2b6cb0; }
         .isim-btn { background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .isim-btn:hover { background: #4b5563; }
-        .ekran-govde { display: flex; gap: 22px; flex: 1; overflow: hidden; }
+        .ekran-govde { display: flex; gap: 22px; flex-1; overflow: hidden; }
         .urun-bolumu { flex: 1.6; overflow-y: auto; padding-right: 10px; }
         .kategori { margin-bottom: 22px; }
         .kategoriBaslik { background: #f1f3f7; color: #2d3748; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 700; font-size: 14px; border-left: 4px solid #4a5568; }
@@ -113,13 +118,7 @@
         .siparisListesi { flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 5px; }
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: 14px; }
         
-        .siparisSatiri.mobil-satir {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 12px 0;
-        }
+        .siparisSatiri.mobil-satir { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 0; }
         .mobil-urun-bilgi { flex: 1; padding: 0 4px; }
 
         .ikram-urunu { text-decoration: line-through; color: #a0aec0; }
@@ -267,7 +266,10 @@
 </header>
 
 <div class="ana-konteyner">
-    <div class="bolum-baslik">🪑 Masalar</div>
+    <div class="bolum-baslik">
+        <span>🪑 Masalar</span>
+        <span class="vardiya-bilgi-bar">🕒 İş Günü: <strong id="aktifIsGunuText">-</strong></span>
+    </div>
     <div class="masalar">
         <div class="masa" id="masaKart1" onclick="masaAc('1')"><h2 id="masaBaslikKart1">Masa 1</h2><div id="durum1" class="durum-rozeti bos">Müsait</div></div>
         <div class="masa" id="masaKart2" onclick="masaAc('2')"><h2 id="masaBaslikKart2">Masa 2</h2><div id="durum2" class="durum-rozeti bos">Müsait</div></div>
@@ -561,12 +563,31 @@
     let bugunPaketUrunSatis = {};
     let bugunMasaDetaylari = []; 
     let bugunPaketDetaylari = []; 
+    let bugunVardiyaTarihi = null; 
     let gecmisGunler = [];
     let aktifIskontoOrani = 0; 
     let aktifBolmeSayisi = 1;
     let secilenCihaz = 'pc';
 
     const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','p1','p2'];
+
+    // VARDİYA HESAPLAMA MOTORU:
+    // Saat 05:00'ten gece 04:59'a kadar olan süre TEK BİR İŞ GÜNÜDÜR.
+    // Örneğin 10 Mart saat 12:00 -> 10.03.2025
+    // 11 Mart saat 01:30 gece -> YİNE 10.03.2025 (Dünün tarihi)
+    function aktifIsGunuGetir(ozelTarih) {
+        let d = ozelTarih ? new Date(ozelTarih) : new Date();
+        if (d.getHours() < 5) {
+            d.setDate(d.getDate() - 1);
+        }
+        return d.toLocaleDateString('tr-TR');
+    }
+
+    function vardiyaGostergesiniGuncelle() {
+        let el = document.getElementById("aktifIsGunuText");
+        if (el) el.innerText = aktifIsGunuGetir();
+    }
+    setInterval(vardiyaGostergesiniGuncelle, 60000);
 
     function cihazSec(tur) {
         secilenCihaz = tur;
@@ -612,7 +633,6 @@
         return "Masa " + key;
     }
 
-    // Firestore Dinleyicileri
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
         try {
             masalar = doc.exists ? (doc.data() || {}) : {};
@@ -652,15 +672,19 @@
                 bugunPaketUrunSatis = data.paketUrunler || {};
                 bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
                 bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
+                bugunVardiyaTarihi = data.vardiyaTarihi || null;
+
+                // GÜN DEĞİŞİM KONTROLÜ: Eğer dün gece kapanış yapılmadıysa ve yeni güne geçildiyse
+                vardiyaDegisimKontrol();
             } else {
                 bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
                 bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
+                bugunVardiyaTarihi = aktifIsGunuGetir();
             }
             bugunCirosunuGuncelle();
         } catch(e) { console.error("Bugün verisi hatası:", e); }
     });
 
-    // TARİH ÇEVİRİCİ: Hangi formatta olursa olsun milisaniyeye çevirip hatasız sıralar
     function tarihMilisaniye(tarihStr, tarihIso) {
         if (tarihIso) {
             let t = new Date(tarihIso).getTime();
@@ -676,7 +700,6 @@
         return 0;
     }
 
-    // TÜM GEÇMİŞİ FİLTRELEME OLMADAN, GÜVENLE ÇEKER
     db.collection("gecmis").onSnapshot((snapshot) => {
         try {
             let liste = [];
@@ -684,19 +707,12 @@
                 let data = doc.data() || {};
                 liste.push({ id: doc.id, ...data });
             });
-            
-            // En güncel tarihten eskiye sıralama
             liste.sort((a, b) => {
                 return tarihMilisaniye(b.tarih, b.tarihIso) - tarihMilisaniye(a.tarih, a.tarihIso);
             });
-
             gecmisGunler = liste;
             gecmisGuncelle();
-        } catch(e) {
-            console.error("Geçmiş snapshot hatası:", e);
-        }
-    }, (err) => {
-        console.error("Firestore geçmiş dinleyici hatası:", err);
+        } catch(e) { console.error("Geçmiş hatası:", e); }
     });
 
     function masalariKaydet() { db.collection("pos_data").doc("masalar").set(masalar); }
@@ -704,10 +720,107 @@
     function paketTutarlariniKaydet() { db.collection("pos_data").doc("paketToplamTutarlari").set(paketToplamTutarlari); }
     
     function bugunVerileriniKaydet() {
+        if (!bugunVardiyaTarihi) bugunVardiyaTarihi = aktifIsGunuGetir();
         db.collection("pos_data").doc("bugun").set({
             ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
-            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari, paketDetaylari: bugunPaketDetaylari
+            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari, paketDetaylari: bugunPaketDetaylari,
+            vardiyaTarihi: bugunVardiyaTarihi
         });
+    }
+
+    // =====================================================================
+    // OTOMATİK GÜN SONU & VARDİYA KONTROL MOTORU
+    // =====================================================================
+
+    // 1) Eğer dünün vardiyası aktarılmadan yeni günün vardiyasına geçildiyse tespit edip aktarır
+    function vardiyaDegisimKontrol() {
+        let suankiVardiya = aktifIsGunuGetir();
+        if (bugunVardiyaTarihi && bugunVardiyaTarihi !== suankiVardiya) {
+            if (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0) {
+                console.log(`[Vardiya Motoru] Önceki günün (${bugunVardiyaTarihi}) cirosu aktarılmamış. Otomatik aktarılıyor...`);
+                otomatikGunSonuUygula(bugunVardiyaTarihi);
+            } else {
+                bugunVardiyaTarihi = suankiVardiya;
+                bugunVerileriniKaydet();
+            }
+        }
+    }
+
+    // 2) Gece saat 03:00 Otomatik Gün Sonu (Her 30 saniyede kontrol)
+    setInterval(() => {
+        let simdi = new Date();
+        // Gece 03:00 - 03:30 arasında otomatik kapanış tetiklenir
+        if (simdi.getHours() === 3 && simdi.getMinutes() <= 30) {
+            let hedefTarih = aktifIsGunuGetir();
+            let sonKapanis = localStorage.getItem("wt_otomatik_gunsonu_" + hedefTarih);
+
+            if (!sonKapanis && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
+                localStorage.setItem("wt_otomatik_gunsonu_" + hedefTarih, "TAMAMLANDI");
+                otomatikGunSonuUygula(hedefTarih);
+            }
+        }
+    }, 30000);
+
+    // Otomatik aktarım fonksiyonu
+    function otomatikGunSonuUygula(aktarilacakTarih) {
+        let mevcutGun = gecmisGunler.find(g => g.tarih === aktarilacakTarih);
+
+        if (mevcutGun) {
+            let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
+            let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
+            let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
+            let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
+            
+            let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
+            for (let urunAdi in bugunUrunSatis) {
+                let ekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
+                let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
+                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
+                yeniUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
+            }
+
+            let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
+            for (let urunAdi in bugunPaketUrunSatis) {
+                let ekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
+                let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
+                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
+                let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
+                yeniPaketUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
+            }
+
+            let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
+            let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
+
+            db.collection("gecmis").doc(mevcutGun.id).update({
+                ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
+                urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
+            }).then(() => {
+                sifirlaVeYeniGuneBasla();
+                console.log(`[Otomatik Gün Sonu] ${aktarilacakTarih} kaydına eklendi ve yeni gün açıldı.`);
+            });
+
+        } else {
+            let tarihIso = new Date().toISOString();
+            db.collection("gecmis").add({
+                tarih: aktarilacakTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
+                nakit: bugunNakitCiro, kart: bugunKartCiro, 
+                urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
+                paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
+                masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
+                paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
+            }).then(() => {
+                sifirlaVeYeniGuneBasla();
+                console.log(`[Otomatik Gün Sonu] ${aktarilacakTarih} tarihiyle gün sonu yapıldı.`);
+            });
+        }
+    }
+
+    function sifirlaVeYeniGuneBasla() {
+        bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
+        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
+        bugunVardiyaTarihi = aktifIsGunuGetir();
+        bugunVerileriniKaydet();
     }
 
     function gecmisModalAc() {
@@ -1147,7 +1260,7 @@
             kartInput.value = Math.max(0, Math.round(toplam - nakitVal));
         } else {
             let kartVal = parseFloat(kartInput.value) || 0;
-            if (kartVal > toplam) { kartVal = toplam; kartInput.value = toplam; }
+            if (kartVal > toplam) { kartVal = toplam; kartInput.value = total; }
             nakitInput.value = Math.max(0, Math.round(toplam - kartVal));
         }
     }
@@ -1225,6 +1338,7 @@
             });
         }
 
+        bugunVardiyaTarihi = aktifIsGunuGetir();
         bugunVerileriniKaydet();
 
         alert(`${masaIsmi} ödemesi alındı.\nTutar: ${Math.round(odenecekTutar)} ₺`);
@@ -1253,6 +1367,7 @@
         document.getElementById("bugunCiro").innerText = Math.round(bugunToplamCiro);
         document.getElementById("bugunPaketCiro").innerText = Math.round(bugunPaketToplamCiro);
         document.getElementById("bugunOdemeKanalVal").innerText = `${Math.round(bugunNakitCiro)} ₺ Nakit / ${Math.round(bugunKartCiro)} ₺ Kart`;
+        vardiyaGostergesiniGuncelle();
         analizleriGuncelle();
     }
 
@@ -1388,93 +1503,15 @@
         });
     }
 
-    function varsayilanKapanisTarihiGetir() {
-        let simdi = new Date();
-        let saat = simdi.getHours();
-        if (saat < 5) {
-            simdi.setDate(simdi.getDate() - 1);
-        }
-        return simdi.toLocaleDateString('tr-TR');
-    }
-
-    function otomatikGunuBitir() {
-        if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) return;
-
-        let secilenTarih = varsayilanKapanisTarihiGetir();
-        let mevcutGun = gecmisGunler.find(g => g.tarih === secilenTarih);
-
-        if (mevcutGun) {
-            let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
-            let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
-            let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
-            let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
-            
-            let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
-            for (let urunAdi in bugunUrunSatis) {
-                let eklenecekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
-                let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
-
-                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
-                yeniUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
-            }
-
-            let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
-            for (let urunAdi in bugunPaketUrunSatis) {
-                let eklenecekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
-                let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
-
-                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
-                yeniPaketUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
-            }
-
-            let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
-            let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
-
-            db.collection("gecmis").doc(mevcutGun.id).update({
-                ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
-                urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
-            }).then(() => {
-                sifirlaVeKaydet();
-            });
-
-        } else {
-            let tarihIso = new Date().toISOString();
-            db.collection("gecmis").add({
-                tarih: secilenTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
-                nakit: bugunNakitCiro, kart: bugunKartCiro, 
-                urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
-                paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
-                masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
-                paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
-            }).then(() => {
-                sifirlaVeKaydet();
-            });
-        }
-    }
-
-    setInterval(() => {
-        let simdi = new Date();
-        if (simdi.getHours() === 1 && simdi.getMinutes() <= 30) {
-            let takvimBugun = simdi.toLocaleDateString('tr-TR');
-            let sonKapanis = localStorage.getItem("wt_son_otomatik_kapanis");
-            
-            if (sonKapanis !== takvimBugun && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
-                localStorage.setItem("wt_son_otomatik_kapanis", takvimBugun);
-                otomatikGunuBitir();
-            }
-        }
-    }, 30000);
-
+    // MANUEL GÜNÜ BİTİR: Otomatik olarak o anki vardiyanın tarihini (gece 01:00 ise dünün tarihini) önerir
     function gunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
             alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
             return;
         }
 
-        let varsayilanTarih = varsayilanKapanisTarihiGetir();
-        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz?:", varsayilanTarih);
+        let varsayilanTarih = bugunVardiyaTarihi || aktifIsGunuGetir();
+        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (Gece saatlerinde otomatik olarak vardiyanın ait olduğu tarih seçilir):", varsayilanTarih);
 
         if (!secilenTarih) return;
         secilenTarih = secilenTarih.trim();
@@ -1491,22 +1528,20 @@
                 
                 let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
                 for (let urunAdi in bugunUrunSatis) {
-                    let eklenecekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
+                    let ekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
                     let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
-
                     if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
                     let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
-                    yeniUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
+                    yeniUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
                 }
 
                 let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
                 for (let urunAdi in bugunPaketUrunSatis) {
-                    let eklenecekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
+                    let ekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
                     let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
-
                     if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
                     let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
-                    yeniPaketUrunler[urunAdi] = { adet: mevAdet + eklenecekAdet, fiyat: fiyat };
+                    yeniPaketUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
                 }
 
                 let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
@@ -1516,7 +1551,7 @@
                     ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
                     urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
                 }).then(() => {
-                    sifirlaVeKaydet();
+                    sifirlaVeYeniGuneBasla();
                     alert(`${secilenTarih} tarihli mevcut kaydın üzerine eklendi!`);
                 });
 
@@ -1530,17 +1565,11 @@
                     masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
                     paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
                 }).then(() => {
-                    sifirlaVeKaydet();
+                    sifirlaVeYeniGuneBasla();
                     alert(`${secilenTarih} tarihiyle gün başarıyla aktarıldı!`);
                 });
             }
         }
-    }
-
-    function sifirlaVeKaydet() {
-        bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
-        bugunVerileriniKaydet();
     }
 
     function gunuGeriYukleDoc(docId) {
@@ -1772,6 +1801,9 @@
 
         document.getElementById("detayEkrani").style.display = "flex";
     }
+
+    // İlk açılışta vardiya tarihini ekranda göster
+    vardiyaGostergesiniGuncelle();
 </script>
 
 </body>
