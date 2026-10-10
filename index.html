@@ -13,7 +13,6 @@
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background: #f4f5f7; color: #22252a; padding-bottom: 70px; }
         
-        /* Cihaz Seçim Ekranı Overlay */
         #cihazSecimEkrani {
             position: fixed; inset: 0; background: #1e2025; z-index: 99999;
             display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 25px;
@@ -29,7 +28,6 @@
         .cihaz-btn span { pointer-events: none; }
         .cihaz-btn:hover, .cihaz-btn:active { background: rgba(255, 255, 255, 0.25); transform: translateY(-3px); }
 
-        /* Header */
         header { 
             background: #1e2025; color: white; padding: 15px 25px; position: relative; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
@@ -104,7 +102,7 @@
         .kategoriBaslik { background: #f1f3f7; color: #2d3748; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 700; font-size: 14px; border-left: 4px solid #4a5568; }
         .urunler { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .urun { border: 1px solid #e2e8f0; background: #ffffff; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-size: 14px; text-align: center; transition: 0.2s; color: #2d3748; position: relative; user-select: none; }
-        .urun * { pointer-events: none; } /* Tıklama olayını ana butona kilitler */
+        .urun * { pointer-events: none; }
         .urun:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
         .urun strong { display: block; margin-bottom: 5px; color: #1a202c; }
         
@@ -150,7 +148,6 @@
         .paket-toplam-girdi-alan label { font-size: 14px; font-weight: bold; color: #2b6cb0; }
         .paket-toplam-girdi-alan input { width: 110px; padding: 6px 10px; border: 2px solid #3182ce; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: right; color: #2b6cb0; outline: none; }
 
-        /* Masaüstü Ödeme Buton Grubu */
         .pc-odeme-grubu { display: flex; gap: 8px; margin-top: 10px; }
         .btn-odeme-nakit { flex: 2; padding: 14px 8px; border: none; border-radius: 10px; background: #38a169; color: white; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(56, 161, 105, 0.25); text-align: center; }
         .btn-odeme-nakit:hover { background: #2f855a; }
@@ -159,7 +156,6 @@
         .btn-odeme-parcali { flex: 1.2; padding: 14px 4px; border: 1.5px solid #cbd5e0; border-radius: 10px; background: #ffffff; color: #4a5568; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; text-align: center; line-height: 1.2; }
         .btn-odeme-parcali:hover { background: #edf2f7; border-color: #a0aec0; color: #1a202c; }
 
-        /* Mobil Tek Ödeme Butonu */
         .odemeAlindi { width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 10px; background: #38a169; color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(56, 161, 105, 0.2); transition: 0.2s; }
         .odemeAlindi:hover { background: #2f855a; }
         
@@ -411,27 +407,23 @@
                     <div id="kisiBasiBilgi" class="kisi-basi-bilgi" style="display:none;"></div>
                 </div>
 
-                <!-- Bilgisayar Modu Butonları -->
                 <div class="pc-odeme-grubu" id="pcOdemeGrubu">
                     <button class="btn-odeme-nakit" onclick="hesapKapatHizli('Nakit')">💵 NAKİT</button>
                     <button class="btn-odeme-kart" onclick="hesapKapatHizli('Kart')">💳 KART</button>
                     <button class="btn-odeme-parcali" onclick="parcaliOdemeModalAc()">⚖️ Nakit+Kart</button>
                 </div>
 
-                <!-- Mobil Mod Tek Buton -->
                 <button class="odemeAlindi" id="mobilOdemeAlBtn" style="display:none;" onclick="odemeAlTetikle()">✓ ÖDEME AL</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Mobil Alt Sabit Bar -->
 <div class="mobil-alt-bar" id="mobilAltBar">
     <div class="mobil-toplam-text">Toplam: <span id="mobilToplamText">0</span> ₺</div>
     <button class="mobil-detay-ac-btn" onclick="mobilSepetModalAc()">📋 Sipariş Detayı</button>
 </div>
 
-<!-- Mobil İçin Ödeme Tipi Ekranı -->
 <div id="odemeTipiEkrani" class="modal-overlay">
     <div class="detayKutusu" style="width:400px;">
         <div class="ust">
@@ -446,7 +438,6 @@
     </div>
 </div>
 
-<!-- Parçalı (Nakit + Kart) Ödeme Modalı -->
 <div id="parcaliOdemeEkrani" class="modal-overlay">
     <div class="detayKutusu" style="width:420px;">
         <div class="ust">
@@ -470,7 +461,6 @@
     </div>
 </div>
 
-<!-- Genel Detay Ekranı -->
 <div id="detayEkrani" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu">
         <div class="ust">
@@ -492,7 +482,6 @@
     </div>
 </div>
 
-<!-- GEÇMİŞ & ANALİZ BÜYÜK MODAL EKRANI -->
 <div id="gecmisModalEkrani" class="modal-overlay">
     <div class="buyukDetayKutusu">
         <div class="ust">
@@ -526,7 +515,6 @@
     </div>
 </div>
 
-<!-- GEÇMİŞ GÜNÜ DÜZENLE MODALI -->
 <div id="gecmisDuzenleModal" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu" style="width:420px;">
         <div class="ust">
@@ -623,72 +611,91 @@
         return "Masa " + key;
     }
 
-    // Firestore dinleyicileri
+    // Firestore Dinleyicileri
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
-        masalar = doc.exists ? (doc.data() || {}) : {};
-        tumMasaDurumlariniGuncelle();
-        if (seciliMasa) siparisiGoster();
-    }, err => console.error("Masalar dinleme hatası:", err));
+        try {
+            masalar = doc.exists ? (doc.data() || {}) : {};
+            tumMasaDurumlariniGuncelle();
+            if (seciliMasa) siparisiGoster();
+        } catch(e) { console.error("Masalar hatası:", e); }
+    });
 
     db.collection("pos_data").doc("masaIsimleri").onSnapshot((doc) => {
-        masaIsimleri = doc.exists ? (doc.data() || {}) : {};
-        tumMasaDurumlariniGuncelle();
-        if (seciliMasa) {
-            let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
-            document.getElementById("masaBaslik").innerText = gosterilecekIsim;
-        }
-    }, err => console.error("Masa isimleri hatası:", err));
+        try {
+            masaIsimleri = doc.exists ? (doc.data() || {}) : {};
+            tumMasaDurumlariniGuncelle();
+            if (seciliMasa) {
+                let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
+                document.getElementById("masaBaslik").innerText = gosterilecekIsim;
+            }
+        } catch(e) { console.error("Masa isimleri hatası:", e); }
+    });
 
     db.collection("pos_data").doc("paketToplamTutarlari").onSnapshot((doc) => {
-        paketToplamTutarlari = doc.exists ? (doc.data() || {}) : {};
-        tumMasaDurumlariniGuncelle();
-        if (seciliMasa) siparisiGoster();
-    }, err => console.error("Paket tutar hatası:", err));
+        try {
+            paketToplamTutarlari = doc.exists ? (doc.data() || {}) : {};
+            tumMasaDurumlariniGuncelle();
+            if (seciliMasa) siparisiGoster();
+        } catch(e) { console.error("Paket tutar hatası:", e); }
+    });
 
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
-        if (doc.exists) {
-            let data = doc.data() || {};
-            bugunToplamCiro = data.ciro || 0;
-            bugunPaketToplamCiro = data.paketCiro || 0;
-            bugunNakitCiro = data.nakit || 0;
-            bugunKartCiro = data.kart || 0;
-            bugunUrunSatis = data.urunler || {};
-            bugunPaketUrunSatis = data.paketUrunler || {};
-            bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
-            bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
-        } else {
-            bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-            bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
+        try {
+            if (doc.exists) {
+                let data = doc.data() || {};
+                bugunToplamCiro = Number(data.ciro) || 0;
+                bugunPaketToplamCiro = Number(data.paketCiro) || 0;
+                bugunNakitCiro = Number(data.nakit) || 0;
+                bugunKartCiro = Number(data.kart) || 0;
+                bugunUrunSatis = data.urunler || {};
+                bugunPaketUrunSatis = data.paketUrunler || {};
+                bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
+                bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
+            } else {
+                bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
+                bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
+            }
+            bugunCirosunuGuncelle();
+        } catch(e) { console.error("Bugün verisi hatası:", e); }
+    });
+
+    // TARİH ÇEVİRİCİ: Hangi formatta olursa olsun milisaniyeye çevirip hatasız sıralar
+    function tarihMilisaniye(tarihStr, tarihIso) {
+        if (tarihIso) {
+            let t = new Date(tarihIso).getTime();
+            if (!isNaN(t) && t > 0) return t;
         }
-        bugunCirosunuGuncelle();
-    }, err => console.error("Bugün verisi hatası:", err));
+        if (tarihStr && typeof tarihStr === 'string') {
+            let parts = tarihStr.split('.');
+            if (parts.length === 3) {
+                let d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])).getTime();
+                if (!isNaN(d)) return d;
+            }
+        }
+        return 0;
+    }
 
-    // GEÇMİŞ DİNLEYİCİSİ - İndex kırılmasını önlemek için istemci tarafında sıralama yapılıyor
+    // TÜM GEÇMİŞİ FİLTRELEME OLMADAN, GÜVENLE ÇEKER
     db.collection("gecmis").onSnapshot((snapshot) => {
-        let geciciListe = [];
-        snapshot.forEach((doc) => {
-            geciciListe.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Tarih sırasına göre en yeniden en eskiye sırala
-        geciciListe.sort((a, b) => {
-            let tA = a.tarihIso ? new Date(a.tarihIso).getTime() : 0;
-            let tB = b.tarihIso ? new Date(b.tarihIso).getTime() : 0;
-            if (tA === 0 && a.tarih) {
-                let parts = a.tarih.split('.');
-                if (parts.length === 3) tA = new Date(parts[2], parts[1] - 1, parts[0]).getTime();
-            }
-            if (tB === 0 && b.tarih) {
-                let parts = b.tarih.split('.');
-                if (parts.length === 3) tB = new Date(parts[2], parts[1] - 1, parts[0]).getTime();
-            }
-            return tB - tA;
-        });
+        try {
+            let liste = [];
+            snapshot.forEach((doc) => {
+                let data = doc.data() || {};
+                liste.push({ id: doc.id, ...data });
+            });
+            
+            // En güncel tarihten eskiye sıralama
+            liste.sort((a, b) => {
+                return tarihMilisaniye(b.tarih, b.tarihIso) - tarihMilisaniye(a.tarih, a.tarihIso);
+            });
 
-        gecmisGunler = geciciListe;
-        gecmisGuncelle();
+            gecmisGunler = liste;
+            gecmisGuncelle();
+        } catch(e) {
+            console.error("Geçmiş snapshot hatası:", e);
+        }
     }, (err) => {
-        console.error("Geçmiş dinleme hatası:", err);
+        console.error("Firestore geçmiş dinleyici hatası:", err);
     });
 
     function masalariKaydet() { db.collection("pos_data").doc("masalar").set(masalar); }
@@ -1249,57 +1256,61 @@
     }
 
     function analizleriGuncelle() {
-        let buAy = new Date().getMonth();
-        let buYil = new Date().getFullYear();
-        
-        let aylikMasaToplam = bugunToplamCiro;
-        let aylikPaketToplam = bugunPaketToplamCiro;
+        try {
+            let buAy = new Date().getMonth();
+            let buYil = new Date().getFullYear();
+            
+            let aylikMasaToplam = bugunToplamCiro;
+            let aylikPaketToplam = bugunPaketToplamCiro;
 
-        gecmisGunler.forEach(gun => {
-            let parts = gun.tarih ? gun.tarih.split('.') : [];
-            if (parts.length === 3) {
-                let gunTarihi = new Date(parts[2], parts[1] - 1, parts[0]);
-                if (gunTarihi.getMonth() === buAy && gunTarihi.getFullYear() === buYil) {
-                    aylikMasaToplam += (gun.ciro || 0);
-                    aylikPaketToplam += (gun.paketCiro || 0);
+            gecmisGunler.forEach(gun => {
+                let ms = tarihMilisaniye(gun.tarih, gun.tarihIso);
+                if (ms > 0) {
+                    let d = new Date(ms);
+                    if (d.getMonth() === buAy && d.getFullYear() === buYil) {
+                        aylikMasaToplam += (Number(gun.ciro) || 0);
+                        aylikPaketToplam += (Number(gun.paketCiro) || 0);
+                    }
+                }
+            });
+            
+            document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
+
+            let tumUrunler = {};
+            function urunSay(obj) {
+                if (!obj || typeof obj !== 'object') return;
+                for (let u in obj) {
+                    let ad = u.replace(" (İkram)", "").trim();
+                    let item = obj[u];
+                    let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
+                    adet = isNaN(adet) ? 0 : adet;
+
+                    if (adet > 300) continue;
+
+                    if (!tumUrunler[ad]) tumUrunler[ad] = 0;
+                    tumUrunler[ad] += adet;
                 }
             }
-        });
-        
-        document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
 
-        let tumUrunler = {};
-        function urunSay(obj) {
-            if (!obj) return;
-            for (let u in obj) {
-                let ad = u.replace(" (İkram)", "").trim();
-                let item = obj[u];
-                let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
-                adet = isNaN(adet) ? 0 : adet;
+            urunSay(bugunUrunSatis);
+            urunSay(bugunPaketUrunSatis);
+            gecmisGunler.forEach(gun => {
+                urunSay(gun.urunler);
+                urunSay(gun.paketUrunler);
+            });
 
-                if (adet > 300) continue;
-
-                if (!tumUrunler[ad]) tumUrunler[ad] = 0;
-                tumUrunler[ad] += adet;
+            let enCokSatan = "-";
+            let maxAdet = 0;
+            for (let u in tumUrunler) {
+                if (tumUrunler[u] > maxAdet) {
+                    maxAdet = tumUrunler[u];
+                    enCokSatan = `${u} (${maxAdet} adet)`;
+                }
             }
+            document.getElementById("enCokSatanVal").innerText = enCokSatan;
+        } catch(e) {
+            console.error("Analiz hesaplama hatası:", e);
         }
-
-        urunSay(bugunUrunSatis);
-        urunSay(bugunPaketUrunSatis);
-        gecmisGunler.forEach(gun => {
-            urunSay(gun.urunler);
-            urunSay(gun.paketUrunler);
-        });
-
-        let enCokSatan = "-";
-        let maxAdet = 0;
-        for (let u in tumUrunler) {
-            if (tumUrunler[u] > maxAdet) {
-                maxAdet = tumUrunler[u];
-                enCokSatan = `${u} (${maxAdet} adet)`;
-            }
-        }
-        document.getElementById("enCokSatanVal").innerText = enCokSatan;
     }
 
     function gecmisGuncelle() {
@@ -1317,10 +1328,11 @@
             let kart = Math.round(gun.kart || 0);
             let pCiro = Math.round(gun.paketCiro || 0);
             let mCiro = Math.round(gun.ciro || 0);
+            let tarihGoster = gun.tarih || (gun.tarihIso ? new Date(gun.tarihIso).toLocaleDateString('tr-TR') : 'Tarihsiz Kayıt');
             
             html += `
                 <div class="gecmis-satir">
-                    <div class="tarih">📅 ${gun.tarih}</div>
+                    <div class="tarih">📅 ${tarihGoster}</div>
                     <div class="ciro-ozet">
                         <div class="ciro">Masa: ${mCiro} ₺ | Paket: ${pCiro} ₺</div>
                         <div class="odeme-detay">💵 Nakit: ${nakit} ₺ / 💳 Kart: ${kart} ₺</div>
@@ -1344,7 +1356,7 @@
         if (!gun) return;
 
         document.getElementById("duzenleDocId").value = docId;
-        document.getElementById("duzenleModalBaslik").innerText = `Düzenle: ${gun.tarih}`;
+        document.getElementById("duzenleModalBaslik").innerText = `Düzenle: ${gun.tarih || ''}`;
         document.getElementById("duzenleMasaCiro").value = gun.ciro || 0;
         document.getElementById("duzenlePaketCiro").value = gun.paketCiro || 0;
         document.getElementById("duzenleNakit").value = gun.nakit || 0;
@@ -1534,7 +1546,7 @@
         let silinecekGun = gecmisGunler.find(g => g.id === docId);
         if (!silinecekGun) return;
 
-        let onay = confirm(`⚠️ DİKKAT!\n\n${silinecekGun.tarih} tarihli günün cirosunu bugünkü ciroya geri yüklemek ve geçmiş listesinden silmek istediğinize emin misiniz?`);
+        let onay = confirm(`⚠️ DİKKAT!\n\n${silinecekGun.tarih || 'Bu günün'} cirosunu bugünkü ciroya geri yüklemek ve geçmiş listesinden silmek istediğinize emin misiniz?`);
         if (!onay) return;
 
         bugunToplamCiro += (silinecekGun.ciro || 0);
@@ -1585,11 +1597,11 @@
         let silinecekGun = gecmisGunler.find(g => g.id === docId);
         if (!silinecekGun) return;
 
-        let sifre = prompt(`${silinecekGun.tarih} tarihli kaydı silmek için şifreyi girin:`);
+        let sifre = prompt(`${silinecekGun.tarih || ''} tarihli kaydı silmek için şifreyi girin:`);
         if (sifre === null) return;
 
         if (sifre === "serkan123") {
-            if (confirm(`${silinecekGun.tarih} tarihli kayıt kalıcı olarak silinecek. Emin misiniz?`)) {
+            if (confirm(`${silinecekGun.tarih || ''} tarihli kayıt kalıcı olarak silinecek. Emin misiniz?`)) {
                 db.collection("gecmis").doc(docId).delete().then(() => {
                     alert("Kayıt başarıyla silindi.");
                 });
@@ -1634,7 +1646,7 @@
         temizTopla(gun.urunler);
         temizTopla(gun.paketUrunler);
 
-        tabloDoldur(`${gun.tarih} Satış Detayı`, birlesikUrunler);
+        tabloDoldur(`${gun.tarih || 'Geçmiş'} Satış Detayı`, birlesikUrunler);
     }
 
     function tabloDoldur(baslik, urunler) {
