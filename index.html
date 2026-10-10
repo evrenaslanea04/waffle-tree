@@ -103,7 +103,8 @@
         .kategori { margin-bottom: 22px; }
         .kategoriBaslik { background: #f1f3f7; color: #2d3748; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 700; font-size: 14px; border-left: 4px solid #4a5568; }
         .urunler { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .urun { border: 1px solid #e2e8f0; background: #ffffff; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-size: 14px; text-align: center; transition: 0.2s; color: #2d3748; position: relative; }
+        .urun { border: 1px solid #e2e8f0; background: #ffffff; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-size: 14px; text-align: center; transition: 0.2s; color: #2d3748; position: relative; user-select: none; }
+        .urun * { pointer-events: none; } /* Tıklama olayını ana butona kilitler */
         .urun:hover { background: #edf2f7; border-color: #cbd5e0; transform: translateY(-1px); }
         .urun strong { display: block; margin-bottom: 5px; color: #1a202c; }
         
@@ -114,7 +115,6 @@
         .siparisListesi { flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 5px; }
         .siparisSatiri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: 14px; }
         
-        /* Mobil Satır Stili */
         .siparisSatiri.mobil-satir {
             display: flex;
             align-items: center;
@@ -170,7 +170,6 @@
         .odeme-btn.kart { color: #2b6cb0; border-color: #bee3f8; }
         .odeme-btn.kart:hover { background: #ebf8ff; }
         
-        /* Parçalı Ödeme Modal Stili */
         .parcali-kutu { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 15px; margin: 15px 0; }
         .parcali-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .parcali-satir:last-child { margin-bottom: 0; }
@@ -183,7 +182,6 @@
         .detay-tablo th, .detay-tablo td { padding: 10px; text-align: left; border-bottom: 1px solid #edf2f7; }
         .detay-tablo th { background: #f7fafc; color: #4a5568; }
 
-        /* Geçmiş & Analiz Büyük Modal */
         .istatistik-kartlari { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .ist-kart { flex: 1; min-width: 200px; background: #f7fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 12px; }
         .ist-baslik { font-size: 11px; color: #718096; font-weight: bold; text-transform: uppercase; }
@@ -211,7 +209,6 @@
         .gunu-bitir-btn { background: #e53e3e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
         .gunu-bitir-btn:hover { background: #c53030; }
 
-        /* Mobil Alt Bar */
         .mobil-alt-bar {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
             background: #1e2025; color: white; padding: 12px 20px;
@@ -473,7 +470,7 @@
     </div>
 </div>
 
-<!-- Genel Detay Ekranı (z-index 3500 ile en üstte açılır) -->
+<!-- Genel Detay Ekranı -->
 <div id="detayEkrani" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu">
         <div class="ust">
@@ -529,7 +526,7 @@
     </div>
 </div>
 
-<!-- GEÇMİŞ GÜNÜ DÜZENLE MODALI (z-index 3500) -->
+<!-- GEÇMİŞ GÜNÜ DÜZENLE MODALI -->
 <div id="gecmisDuzenleModal" class="modal-overlay" style="z-index: 3500;">
     <div class="detayKutusu" style="width:420px;">
         <div class="ust">
@@ -626,11 +623,12 @@
         return "Masa " + key;
     }
 
+    // Firestore dinleyicileri
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
         masalar = doc.exists ? (doc.data() || {}) : {};
         tumMasaDurumlariniGuncelle();
         if (seciliMasa) siparisiGoster();
-    });
+    }, err => console.error("Masalar dinleme hatası:", err));
 
     db.collection("pos_data").doc("masaIsimleri").onSnapshot((doc) => {
         masaIsimleri = doc.exists ? (doc.data() || {}) : {};
@@ -639,17 +637,17 @@
             let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
             document.getElementById("masaBaslik").innerText = gosterilecekIsim;
         }
-    });
+    }, err => console.error("Masa isimleri hatası:", err));
 
     db.collection("pos_data").doc("paketToplamTutarlari").onSnapshot((doc) => {
         paketToplamTutarlari = doc.exists ? (doc.data() || {}) : {};
         tumMasaDurumlariniGuncelle();
         if (seciliMasa) siparisiGoster();
-    });
+    }, err => console.error("Paket tutar hatası:", err));
 
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
         if (doc.exists) {
-            let data = doc.data();
+            let data = doc.data() || {};
             bugunToplamCiro = data.ciro || 0;
             bugunPaketToplamCiro = data.paketCiro || 0;
             bugunNakitCiro = data.nakit || 0;
@@ -663,12 +661,34 @@
             bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
         }
         bugunCirosunuGuncelle();
-    });
+    }, err => console.error("Bugün verisi hatası:", err));
 
-    db.collection("gecmis").orderBy("tarihIso", "desc").onSnapshot((snapshot) => {
-        gecmisGunler = [];
-        snapshot.forEach((doc) => { gecmisGunler.push({ id: doc.id, ...doc.data() }); });
+    // GEÇMİŞ DİNLEYİCİSİ - İndex kırılmasını önlemek için istemci tarafında sıralama yapılıyor
+    db.collection("gecmis").onSnapshot((snapshot) => {
+        let geciciListe = [];
+        snapshot.forEach((doc) => {
+            geciciListe.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Tarih sırasına göre en yeniden en eskiye sırala
+        geciciListe.sort((a, b) => {
+            let tA = a.tarihIso ? new Date(a.tarihIso).getTime() : 0;
+            let tB = b.tarihIso ? new Date(b.tarihIso).getTime() : 0;
+            if (tA === 0 && a.tarih) {
+                let parts = a.tarih.split('.');
+                if (parts.length === 3) tA = new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+            if (tB === 0 && b.tarih) {
+                let parts = b.tarih.split('.');
+                if (parts.length === 3) tB = new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+            return tB - tA;
+        });
+
+        gecmisGunler = geciciListe;
         gecmisGuncelle();
+    }, (err) => {
+        console.error("Geçmiş dinleme hatası:", err);
     });
 
     function masalariKaydet() { db.collection("pos_data").doc("masalar").set(masalar); }
@@ -791,6 +811,7 @@
     function ekraniKapat(id) { document.getElementById(id).style.display = "none"; }
 
     function urunEkle(urunAdi, fiyat) {
+        if (!seciliMasa) return;
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         let siparis = masalar[seciliMasa];
         
@@ -801,6 +822,8 @@
         } else {
             siparis.push({ ad: urunAdi, fiyat: Number(fiyat), adet: 1, ikramMi: false });
         }
+        siparisiGoster();
+        tumMasaDurumlariniGuncelle();
         masalariKaydet();
     }
 
@@ -814,6 +837,8 @@
         } else {
             siparis[index].adet = yeniAdet;
         }
+        siparisiGoster();
+        tumMasaDurumlariniGuncelle();
         masalariKaydet();
     }
 
@@ -830,6 +855,8 @@
         if (!siparis || !siparis[index]) return;
 
         siparis[index].ikramMi = !siparis[index].ikramMi;
+        siparisiGoster();
+        tumMasaDurumlariniGuncelle();
         masalariKaydet();
     }
 
@@ -875,7 +902,7 @@
         document.querySelectorAll('.urun').forEach(btn => {
             let ad = btn.getAttribute('data-ad');
             let varOlanBadge = btn.querySelector('.urun-adet-badge');
-            if (varOlanBadge) btn.removeChild(varOlanBadge);
+            if (varOlanBadge) varOlanBadge.remove();
 
             let urunGrup = siparis.filter(u => u.ad === ad);
             let toplamAdet = urunGrup.reduce((s, u) => s + (parseInt(u.adet, 10) || 0), 0);
@@ -1153,7 +1180,6 @@
             if (!hedefSatisObjesi[urunAdi]) {
                 hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: (urun.ikramMi ? 0 : Number(urun.fiyat || 0)) };
             }
-            // Sayısal toplama garanti altına alındı
             let mevcutAdet = parseInt(hedefSatisObjesi[urunAdi].adet, 10) || 0;
             hedefSatisObjesi[urunAdi].adet = mevcutAdet + urunAdedi;
             hedefSatisObjesi[urunAdi].fiyat = (urun.ikramMi ? 0 : Number(urun.fiyat || 0));
@@ -1242,7 +1268,6 @@
         
         document.getElementById("aylikCiroVal").innerText = `Masa: ${Math.round(aylikMasaToplam)} ₺ | Paket: ${Math.round(aylikPaketToplam)} ₺`;
 
-        // En çok satan ürün hesabı (tüm adetler güvenle toplanır)
         let tumUrunler = {};
         function urunSay(obj) {
             if (!obj) return;
@@ -1252,7 +1277,6 @@
                 let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
                 adet = isNaN(adet) ? 0 : adet;
 
-                // Eski hatalı aşırı kayıtları filtrele
                 if (adet > 300) continue;
 
                 if (!tumUrunler[ad]) tumUrunler[ad] = 0;
@@ -1351,19 +1375,15 @@
         });
     }
 
-    // Gece 00:00 - 05:00 arası otomatik olarak dünün tarihini önerir/alır
     function varsayilanKapanisTarihiGetir() {
         let simdi = new Date();
         let saat = simdi.getHours();
-        
-        // Gece 05:00'ten önceyse, bu dünün vardiyasıdır (Örn: Cuma günü öğlen açılan dükkan için Cumartesi 01:00'de Cuma tarihi döner)
         if (saat < 5) {
             simdi.setDate(simdi.getDate() - 1);
         }
         return simdi.toLocaleDateString('tr-TR');
     }
 
-    // Gece 01:00 Otomatik Kapanış Fonksiyonu (Soru sormadan sessizce geçmişe aktarır)
     function otomatikGunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) return;
 
@@ -1404,7 +1424,6 @@
                 urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
             }).then(() => {
                 sifirlaVeKaydet();
-                console.log(`[Otomatik Gece Kapanışı 01:00] ${secilenTarih} tarihli kaydın üzerine eklendi.`);
             });
 
         } else {
@@ -1418,20 +1437,16 @@
                 paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
             }).then(() => {
                 sifirlaVeKaydet();
-                console.log(`[Otomatik Gece Kapanışı 01:00] ${secilenTarih} tarihiyle gün aktarıldı.`);
             });
         }
     }
 
-    // Gece 01:00 Otomatik Kapanış Kontrol Motoru (Her 30 saniyede bir kontrol eder)
     setInterval(() => {
         let simdi = new Date();
-        // Gece 01:00 ile 01:30 arasında kontrol eder
         if (simdi.getHours() === 1 && simdi.getMinutes() <= 30) {
             let takvimBugun = simdi.toLocaleDateString('tr-TR');
             let sonKapanis = localStorage.getItem("wt_son_otomatik_kapanis");
             
-            // Bu gece henüz kapanış yapılmadıysa ve aktarılacak ciro varsa çalıştır
             if (sonKapanis !== takvimBugun && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
                 localStorage.setItem("wt_son_otomatik_kapanis", takvimBugun);
                 otomatikGunuBitir();
@@ -1439,7 +1454,6 @@
         }
     }, 30000);
 
-    // Manuel Günü Bitir Fonksiyonu
     function gunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
             alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
@@ -1447,7 +1461,7 @@
         }
 
         let varsayilanTarih = varsayilanKapanisTarihiGetir();
-        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (Gece saatlerinde otomatik dünün tarihi önerilir):", varsayilanTarih);
+        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz?:", varsayilanTarih);
 
         if (!secilenTarih) return;
         secilenTarih = secilenTarih.trim();
@@ -1593,7 +1607,6 @@
         }
     }
 
-    // Geçmiş Detay Tablosu - Temizlenmiş ve Adetleri Düzeltilmiş Fonksiyon
     function gecmisDetayGosterDoc(docId) {
         let gun = gecmisGunler.find(g => g.id === docId);
         if (!gun) return;
@@ -1608,8 +1621,6 @@
                 let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
                 
                 adet = isNaN(adet) ? 0 : adet;
-
-                // Geçmişteki 300'ü aşan saçma/bozuk kayıtları eler
                 if (adet > 300 || adet <= 0) continue;
 
                 if (!birlesikUrunler[u]) {
