@@ -492,7 +492,6 @@
         <div class="ust">
             <h2>📊 Geçmiş & Satış Analizi</h2>
             <div class="ust-butonlar">
-                <button class="gunu-bitir-btn" onclick="gunuBitir()">🌙 Günü Aktar (Sıfırla)</button>
                 <button class="kapat" onclick="ekraniKapat('gecmisModalEkrani')">Kapat</button>
             </div>
         </div>
@@ -685,10 +684,18 @@
         } catch(e) { console.error("Paket tutar hatası:", e); }
     }, baglantiHatasi);
 
-    db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
-        try {
-            if (doc.exists) {
-                let data = doc.data() || {};
+    // "Bugün" artık ayrı bir sayaç değil: o anki iş gününün geçmiş kaydıdır (gecmis/YYYY-AA-GG)
+    let bugunIptal = null, dinlenenTarih = null, eskiTasindi = false;
+    function bugunDinle() {
+        if (!yuklendi.gecmis) return;
+        let t = tarihNormalize(aktifIsGunuGetir());
+        if (t === dinlenenTarih) return;
+        dinlenenTarih = t;
+        bugunVardiyaTarihi = t;
+        if (bugunIptal) bugunIptal();
+        bugunIptal = db.collection("gecmis").doc(gunDocId(t)).onSnapshot((doc) => {
+            try {
+                let data = doc.exists ? (doc.data() || {}) : {};
                 bugunToplamCiro = Number(data.ciro) || 0;
                 bugunPaketToplamCiro = Number(data.paketCiro) || 0;
                 bugunNakitCiro = Number(data.nakit) || 0;
@@ -697,17 +704,21 @@
                 bugunPaketUrunSatis = data.paketUrunler || {};
                 bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
                 bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
-                bugunVardiyaTarihi = data.vardiyaTarihi || null;
-            } else {
-                bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-                bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
-                bugunVardiyaTarihi = aktifIsGunuGetir();
-            }
-            yuklendiIsaretle('bugun');
-            vardiyaDegisimKontrol();
-            bugunCirosunuGuncelle();
-        } catch(e) { console.error("Bugün verisi hatası:", e); }
-    }, baglantiHatasi);
+                yuklendiIsaretle('bugun');
+                bugunCirosunuGuncelle();
+            } catch (e) { console.error("Bugün verisi hatası:", e); }
+        }, baglantiHatasi);
+    }
+    setInterval(bugunDinle, 30000); // iş günü 05:00'te değişince yeni günün kaydına geçer
+
+    // Eski sistemden kalan "bugun" sayacı varsa bir kereye mahsus kendi iş gününün kaydına taşır
+    async function eskiBugunuTasi() {
+        let snap = await db.collection("pos_data").doc("bugun").get();
+        let b = snap.exists ? snap.data() : null;
+        if (b && (Number(b.ciro) > 0 || Number(b.paketCiro) > 0)) {
+            await gunuKapat(tarihNormalize(b.vardiyaTarihi) || tarihNormalize(aktifIsGunuGetir()));
+        }
+    }
 
     // ---- Tarih yardımcıları (tarih = "GG.AA.YYYY" iş günü) ----
     function tarihNormalize(s) {
@@ -719,6 +730,7 @@
         return String(g).padStart(2, '0') + "." + String(a).padStart(2, '0') + "." + y;
     }
     function tarihAnahtari(t) { let p = t.split('.'); return `${p[2]}-${p[1]}-${p[0]}`; }
+    function gunDocId(t) { let m = gecmisGunler.find(g => g.tarih === t); return m ? m.id : tarihAnahtari(t); }
     function tarihIsoOlustur(t) { let p = t.split('.'); return new Date(+p[2], +p[1] - 1, +p[0], 12).toISOString(); }
 
     // Önce iş günü metnine bakar (kapanış saatine değil), yoksa tarihIso'ya
@@ -745,7 +757,8 @@
             gecmisGunler = liste;
             gecmisGuncelle();
             yuklendiIsaretle('gecmis');
-            vardiyaDegisimKontrol();
+            if (!eskiTasindi) { eskiTasindi = true; eskiBugunuTasi().catch(hataGoster); }
+            bugunDinle();
         } catch(e) { console.error("Geçmiş hatası:", e); }
     }, baglantiHatasi);
 
@@ -819,29 +832,7 @@
         }
     }
 
-    function vardiyaDegisimKontrol() {
-        if (!yuklendi.gecmis || !yuklendi.bugun || kapanisDevam) return;
-        let su = aktifIsGunuGetir();
-        if (bugunVardiyaTarihi && bugunVardiyaTarihi !== su) {
-            if (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0) {
-                let t = tarihNormalize(bugunVardiyaTarihi);
-                if (t) gunuKapat(t).catch(hataGoster);
-            } else {
-                bugunVardiyaTarihi = su;
-                bugunVardiyaGuncelle(su);
-            }
-        }
-    }
-
-    // Gece 03:00-03:30 arası otomatik kapanış (işlem idempotent; çift cihazda tek kayıt oluşur)
-    setInterval(() => {
-        let simdi = new Date();
-        if (simdi.getHours() === 3 && simdi.getMinutes() <= 30 && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
-            let hedef = aktifIsGunuGetir();
-            if (localStorage.getItem("wt_otomatik_gunsonu_" + hedef)) return;
-            gunuKapat(hedef).then(ok => { if (ok) localStorage.setItem("wt_otomatik_gunsonu_" + hedef, "TAMAMLANDI"); }).catch(hataGoster);
-        }
-    }, 30000);
+    // Gün sonu aktarımı artık yok: her ödeme doğrudan kendi iş gününün kaydına yazılıyor.
 
     function gecmisModalAc() {
         document.getElementById("gecmisModalEkrani").style.display = "flex";
@@ -1331,7 +1322,8 @@
         if (!tid || !yuklendi.masalar || !yuklendi.bugun) return;
         const isPaket = (tid === 'p1' || tid === 'p2');
         const col = db.collection("pos_data");
-        const refM = col.doc("masalar"), refB = col.doc("bugun"), refN = col.doc("masaIsimleri"), refP = col.doc("paketToplamTutarlari");
+        const su0 = tarihNormalize(aktifIsGunuGetir());
+        const refM = col.doc("masalar"), refB = db.collection("gecmis").doc(gunDocId(su0)), refN = col.doc("masaIsimleri"), refP = col.doc("paketToplamTutarlari");
         const masaIsmi = masaIsimleri[tid] || varsayilanIsimGetir(tid);
         const saatStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
         let odenen = 0;
@@ -1341,10 +1333,8 @@
                 let md = mS.exists ? mS.data() : {};
                 let siparis = md[tid] || [];
                 if (siparis.length === 0) throw new Error("Bu masa başka bir cihazdan zaten kapatılmış veya boş.");
-                let su = aktifIsGunuGetir();
+                let su = su0;
                 let b = bS.exists ? bS.data() : bosBugun(su);
-                if (b.vardiyaTarihi && b.vardiyaTarihi !== su && ((b.ciro || 0) > 0 || (b.paketCiro || 0) > 0))
-                    throw new Error("Önceki iş gününün kapanışı henüz yapılmadı, birkaç saniye sonra tekrar deneyin.");
 
                 let isk = isPaket ? 0 : (Number(md['i' + tid]) || 0);
                 let carpan = 1 - isk / 100;
@@ -1369,7 +1359,9 @@
                 });
 
                 let yb = Object.assign(bosBugun(su), b);
-                yb.vardiyaTarihi = b.vardiyaTarihi || su;
+                yb.tarih = su;
+                yb.tarihIso = tarihIsoOlustur(su);
+                delete yb.vardiyaTarihi;
                 if (isPaket) {
                     yb.paketCiro = (b.paketCiro || 0) + odenen;
                     yb.paketUrunler = hedef;
@@ -1419,8 +1411,8 @@
             let buAy = new Date().getMonth();
             let buYil = new Date().getFullYear();
             
-            let aylikMasaToplam = bugunToplamCiro;
-            let aylikPaketToplam = bugunPaketToplamCiro;
+            let aylikMasaToplam = 0;
+            let aylikPaketToplam = 0;
 
             gecmisGunler.forEach(gun => {
                 let ms = tarihMilisaniye(gun.tarih, gun.tarihIso);
@@ -1451,8 +1443,6 @@
                 }
             }
 
-            urunSay(bugunUrunSatis);
-            urunSay(bugunPaketUrunSatis);
             gecmisGunler.forEach(gun => {
                 urunSay(gun.urunler);
                 urunSay(gun.paketUrunler);
@@ -1499,7 +1489,6 @@
                     <div class="gecmis-butonlar">
                         <button class="btn-mini btn-mini-detay" onclick="gecmisDetayGosterDoc('${gun.id}')">🔍 Detay</button>
                         <button class="btn-mini btn-mini-duzenle" onclick="gecmisDuzenleModalAc('${gun.id}')">✏️ Düzenle</button>
-                        <button class="btn-mini btn-mini-geriyukle" onclick="gunuGeriYukleDoc('${gun.id}')" title="Bu günü bugünün cirosuna ekler">↩️ Geri Yükle</button>
                         <button class="btn-mini btn-mini-sil" onclick="gecmisSilDoc('${gun.id}')">🗑️ Sil</button>
                     </div>
                 </div>
@@ -1545,50 +1534,6 @@
         }).catch(err => {
             alert("Güncelleme hatası: " + err.message);
         });
-    }
-
-    async function gunuBitir() {
-        if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
-            alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
-            return;
-        }
-        let giris = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (GG.AA.YYYY)", bugunVardiyaTarihi || aktifIsGunuGetir());
-        if (!giris) return;
-        let secilenTarih = tarihNormalize(giris);
-        if (!secilenTarih) { alert("Geçersiz tarih. Örnek: 07.10.2026"); return; }
-        if (!confirm(`${secilenTarih} tarihine aktarılıyor:\n\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺\n\nOnaylıyor musunuz?`)) return;
-        try {
-            let ok = await gunuKapat(secilenTarih);
-            alert(ok ? `${secilenTarih} tarihiyle gün aktarıldı!` : "Aktarılacak ciro yok veya başka bir kapanış sürüyor.");
-        } catch (e) { hataGoster(e); }
-    }
-
-    async function gunuGeriYukleDoc(docId) {
-        let gun = gecmisGunler.find(g => g.id === docId);
-        if (!gun) return;
-        if (!confirm(`⚠️ DİKKAT!\n\n${gun.tarih || 'Bu günün'} cirosunu bugünkü ciroya geri yüklemek ve geçmiş listesinden silmek istediğinize emin misiniz?`)) return;
-        let gRef = db.collection("gecmis").doc(docId);
-        let bRef = db.collection("pos_data").doc("bugun");
-        try {
-            await db.runTransaction(async (tx) => {
-                let gS = await tx.get(gRef), bS = await tx.get(bRef);
-                if (!gS.exists) throw new Error("Kayıt zaten silinmiş.");
-                let g = gS.data();
-                let b = bS.exists ? bS.data() : bosBugun(aktifIsGunuGetir());
-                let urunler = JSON.parse(JSON.stringify(b.urunler || {})); urunBirlestir(urunler, g.urunler);
-                let paketUrunler = JSON.parse(JSON.stringify(b.paketUrunler || {})); urunBirlestir(paketUrunler, g.paketUrunler);
-                tx.set(bRef, {
-                    ciro: (b.ciro || 0) + (g.ciro || 0), paketCiro: (b.paketCiro || 0) + (g.paketCiro || 0),
-                    nakit: (b.nakit || 0) + (g.nakit || 0), kart: (b.kart || 0) + (g.kart || 0),
-                    urunler, paketUrunler,
-                    masaDetaylari: (Array.isArray(b.masaDetaylari) ? b.masaDetaylari : []).concat(Array.isArray(g.masaDetaylari) ? g.masaDetaylari : []),
-                    paketDetaylari: (Array.isArray(b.paketDetaylari) ? b.paketDetaylari : []).concat(Array.isArray(g.paketDetaylari) ? g.paketDetaylari : []),
-                    vardiyaTarihi: b.vardiyaTarihi || aktifIsGunuGetir()
-                });
-                tx.delete(gRef);
-            });
-            alert("Kayıt bugüne aktarıldı ve geçmişten silindi!");
-        } catch (e) { hataGoster(e); }
     }
 
     function gecmisSilDoc(docId) {
