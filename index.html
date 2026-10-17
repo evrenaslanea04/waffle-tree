@@ -101,7 +101,7 @@
         .tasima-btn:hover { background: #2b6cb0; }
         .isim-btn { background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .isim-btn:hover { background: #4b5563; }
-        .ekran-govde { display: flex; gap: 22px; flex-1; overflow: hidden; }
+        .ekran-govde { display: flex; gap: 22px; flex: 1; overflow: hidden; }
         .urun-bolumu { flex: 1.6; overflow-y: auto; padding-right: 10px; }
         .kategori { margin-bottom: 22px; }
         .kategoriBaslik { background: #f1f3f7; color: #2d3748; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 700; font-size: 14px; border-left: 4px solid #4a5568; }
@@ -238,6 +238,8 @@
         </button>
     </div>
 </div>
+
+<div id="yukleniyorEkrani" style="position:fixed;inset:0;background:#1e2025;color:#fff;z-index:100000;display:flex;align-items:center;justify-content:center;font-size:20px;text-align:center;padding:20px;"><span id="yukleniyorMetin">Veriler yükleniyor…</span></div>
 
 <header>
     <img src="logo.png" alt="Waffle Tree Logo" class="header-logo" style="display: block;">
@@ -501,7 +503,7 @@
                 <div class="ist-deger" id="aylikCiroVal">Masa: 0 ₺ | Paket: 0 ₺</div>
             </div>
             <div class="ist-kart">
-                <div class="ist-baslik">🏆 En Çok Satan Ürün (Genel)</div>
+                <div class="ist-baslik">🏆 En Çok Satan Ürün (Son 90 Gün)</div>
                 <div class="ist-deger" id="enCokSatanVal">-</div>
             </div>
             <div class="ist-kart">
@@ -633,32 +635,55 @@
         return "Masa " + key;
     }
 
+    const FieldValue = firebase.firestore.FieldValue;
+    const GECMIS_GUN_SAYISI = 90;
+    const yuklendi = { masalar: false, isimler: false, paket: false, bugun: false, gecmis: false };
+
+    function yuklendiIsaretle(k) {
+        yuklendi[k] = true;
+        if (Object.values(yuklendi).every(Boolean)) {
+            let el = document.getElementById("yukleniyorEkrani");
+            if (el) el.style.display = "none";
+        }
+    }
+    function baglantiHatasi(e) {
+        console.error("Firestore hatası:", e);
+        let el = document.getElementById("yukleniyorMetin");
+        if (el && !Object.values(yuklendi).every(Boolean)) el.innerText = "Bağlantı hatası: " + e.message;
+    }
+    function hataGoster(e) {
+        console.error(e);
+        alert("İşlem başarısız: " + ((e && e.message) || e));
+    }
+
     db.collection("pos_data").doc("masalar").onSnapshot((doc) => {
         try {
             masalar = doc.exists ? (doc.data() || {}) : {};
             tumMasaDurumlariniGuncelle();
-            if (seciliMasa) siparisiGoster();
+            if (seciliMasa) iskontoUygula(Number(masalar['i' + seciliMasa]) || 0, true);
+            yuklendiIsaretle('masalar');
         } catch(e) { console.error("Masalar hatası:", e); }
-    });
+    }, baglantiHatasi);
 
     db.collection("pos_data").doc("masaIsimleri").onSnapshot((doc) => {
         try {
             masaIsimleri = doc.exists ? (doc.data() || {}) : {};
             tumMasaDurumlariniGuncelle();
             if (seciliMasa) {
-                let gosterilecekIsim = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
-                document.getElementById("masaBaslik").innerText = gosterilecekIsim;
+                document.getElementById("masaBaslik").innerText = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
             }
+            yuklendiIsaretle('isimler');
         } catch(e) { console.error("Masa isimleri hatası:", e); }
-    });
+    }, baglantiHatasi);
 
     db.collection("pos_data").doc("paketToplamTutarlari").onSnapshot((doc) => {
         try {
             paketToplamTutarlari = doc.exists ? (doc.data() || {}) : {};
             tumMasaDurumlariniGuncelle();
             if (seciliMasa) siparisiGoster();
+            yuklendiIsaretle('paket');
         } catch(e) { console.error("Paket tutar hatası:", e); }
-    });
+    }, baglantiHatasi);
 
     db.collection("pos_data").doc("bugun").onSnapshot((doc) => {
         try {
@@ -673,155 +698,150 @@
                 bugunMasaDetaylari = Array.isArray(data.masaDetaylari) ? data.masaDetaylari : [];
                 bugunPaketDetaylari = Array.isArray(data.paketDetaylari) ? data.paketDetaylari : [];
                 bugunVardiyaTarihi = data.vardiyaTarihi || null;
-
-                // GÜN DEĞİŞİM KONTROLÜ: Eğer dün gece kapanış yapılmadıysa ve yeni güne geçildiyse
-                vardiyaDegisimKontrol();
             } else {
                 bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
                 bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
                 bugunVardiyaTarihi = aktifIsGunuGetir();
             }
+            yuklendiIsaretle('bugun');
+            vardiyaDegisimKontrol();
             bugunCirosunuGuncelle();
         } catch(e) { console.error("Bugün verisi hatası:", e); }
-    });
+    }, baglantiHatasi);
 
+    // ---- Tarih yardımcıları (tarih = "GG.AA.YYYY" iş günü) ----
+    function tarihNormalize(s) {
+        let m = String(s || "").trim().match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+        if (!m) return null;
+        let g = +m[1], a = +m[2], y = +m[3];
+        let d = new Date(y, a - 1, g, 12);
+        if (d.getFullYear() !== y || d.getMonth() !== a - 1 || d.getDate() !== g) return null;
+        return String(g).padStart(2, '0') + "." + String(a).padStart(2, '0') + "." + y;
+    }
+    function tarihAnahtari(t) { let p = t.split('.'); return `${p[2]}-${p[1]}-${p[0]}`; }
+    function tarihIsoOlustur(t) { let p = t.split('.'); return new Date(+p[2], +p[1] - 1, +p[0], 12).toISOString(); }
+
+    // Önce iş günü metnine bakar (kapanış saatine değil), yoksa tarihIso'ya
     function tarihMilisaniye(tarihStr, tarihIso) {
+        let n = tarihNormalize(tarihStr);
+        if (n) {
+            let p = n.split('.');
+            return new Date(+p[2], +p[1] - 1, +p[0], 12).getTime();
+        }
         if (tarihIso) {
             let t = new Date(tarihIso).getTime();
             if (!isNaN(t) && t > 0) return t;
         }
-        if (tarihStr && typeof tarihStr === 'string') {
-            let parts = tarihStr.split('.');
-            if (parts.length === 3) {
-                let d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])).getTime();
-                if (!isNaN(d)) return d;
-            }
-        }
         return 0;
     }
 
-    db.collection("gecmis").onSnapshot((snapshot) => {
+    // Yalnızca son GECMIS_GUN_SAYISI günün kayıtları dinlenir (okuma maliyeti sabit kalır)
+    const gecmisSiniri = new Date(Date.now() - GECMIS_GUN_SAYISI * 86400000).toISOString();
+    db.collection("gecmis").where("tarihIso", ">=", gecmisSiniri).onSnapshot((snapshot) => {
         try {
             let liste = [];
-            snapshot.forEach((doc) => {
-                let data = doc.data() || {};
-                liste.push({ id: doc.id, ...data });
-            });
-            liste.sort((a, b) => {
-                return tarihMilisaniye(b.tarih, b.tarihIso) - tarihMilisaniye(a.tarih, a.tarihIso);
-            });
+            snapshot.forEach((doc) => { liste.push({ id: doc.id, ...(doc.data() || {}) }); });
+            liste.sort((a, b) => tarihMilisaniye(b.tarih, b.tarihIso) - tarihMilisaniye(a.tarih, a.tarihIso));
             gecmisGunler = liste;
             gecmisGuncelle();
+            yuklendiIsaretle('gecmis');
+            vardiyaDegisimKontrol();
         } catch(e) { console.error("Geçmiş hatası:", e); }
-    });
+    }, baglantiHatasi);
 
-    function masalariKaydet() { db.collection("pos_data").doc("masalar").set(masalar); }
-    function masaIsimleriniKaydet() { db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri); }
-    function paketTutarlariniKaydet() { db.collection("pos_data").doc("paketToplamTutarlari").set(paketToplamTutarlari); }
-    
-    function bugunVerileriniKaydet() {
-        if (!bugunVardiyaTarihi) bugunVardiyaTarihi = aktifIsGunuGetir();
-        db.collection("pos_data").doc("bugun").set({
-            ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro, nakit: bugunNakitCiro, kart: bugunKartCiro,
-            urunler: bugunUrunSatis, paketUrunler: bugunPaketUrunSatis, masaDetaylari: bugunMasaDetaylari, paketDetaylari: bugunPaketDetaylari,
-            vardiyaTarihi: bugunVardiyaTarihi
-        });
+    // Yalnızca değişen masaların alanı yazılır (diğer masalar/cihazlar ezilmez)
+    function masalariKaydet(...anahtarlar) {
+        if (!yuklendi.masalar) return;
+        let o = {};
+        anahtarlar.forEach(k => { o[k] = masalar[k] || []; });
+        return db.collection("pos_data").doc("masalar").set(o, { merge: true }).catch(hataGoster);
+    }
+    function masaIsimleriniKaydet() { if (yuklendi.isimler) db.collection("pos_data").doc("masaIsimleri").set(masaIsimleri).catch(hataGoster); }
+    function paketTutarlariniKaydet() { if (yuklendi.paket) db.collection("pos_data").doc("paketToplamTutarlari").set(paketToplamTutarlari).catch(hataGoster); }
+    function bugunVardiyaGuncelle(t) { return db.collection("pos_data").doc("bugun").set({ vardiyaTarihi: t }, { merge: true }).catch(hataGoster); }
+
+
+    // =====================================================================
+    // GÜN SONU: tek fonksiyon, transaction ile (birden çok cihaz açık olsa da tek kayıt)
+    // =====================================================================
+    let kapanisDevam = false;
+
+    function bosBugun(vardiya) {
+        return { ciro: 0, paketCiro: 0, nakit: 0, kart: 0, urunler: {}, paketUrunler: {}, masaDetaylari: [], paketDetaylari: [], vardiyaTarihi: vardiya };
     }
 
-    // =====================================================================
-    // OTOMATİK GÜN SONU & VARDİYA KONTROL MOTORU
-    // =====================================================================
+    // kaynak ürünleri hedefe ekler: { ad: {adet, fiyat, toplam} } (eski kayıtlardaki sayı/toplamsız biçimleri de okur)
+    function urunBirlestir(hedef, kaynak) {
+        for (let ad in (kaynak || {})) {
+            let it = kaynak[ad];
+            let adet = typeof it === 'object' ? (parseInt(it.adet, 10) || 0) : (parseInt(it, 10) || 0);
+            let fiyat = typeof it === 'object' ? Number(it.fiyat || 0) : 0;
+            let toplam = (typeof it === 'object' && it.toplam !== undefined) ? Number(it.toplam) : adet * fiyat;
+            let mev = hedef[ad];
+            if (typeof mev !== 'object' || mev === null) mev = { adet: parseInt(mev, 10) || 0, fiyat: 0, toplam: 0 };
+            else if (mev.toplam === undefined) mev = { adet: parseInt(mev.adet, 10) || 0, fiyat: Number(mev.fiyat || 0), toplam: (parseInt(mev.adet, 10) || 0) * Number(mev.fiyat || 0) };
+            hedef[ad] = { adet: (parseInt(mev.adet, 10) || 0) + adet, fiyat: fiyat || mev.fiyat, toplam: mev.toplam + toplam };
+        }
+    }
 
-    // 1) Eğer dünün vardiyası aktarılmadan yeni günün vardiyasına geçildiyse tespit edip aktarır
+    async function gunuKapat(tarih) {
+        if (kapanisDevam || !yuklendi.gecmis) return false;
+        kapanisDevam = true;
+        try {
+            let mevcut = gecmisGunler.find(g => g.tarih === tarih);
+            let gRef = db.collection("gecmis").doc(mevcut ? mevcut.id : tarihAnahtari(tarih));
+            let bRef = db.collection("pos_data").doc("bugun");
+            await db.runTransaction(async (tx) => {
+                let bS = await tx.get(bRef), gS = await tx.get(gRef);
+                let b = bS.exists ? bS.data() : {};
+                if (!(Number(b.ciro) > 0 || Number(b.paketCiro) > 0)) throw "BOS";
+                let g = gS.exists ? gS.data() : {};
+                let urunler = JSON.parse(JSON.stringify(g.urunler || {})); urunBirlestir(urunler, b.urunler);
+                let paketUrunler = JSON.parse(JSON.stringify(g.paketUrunler || {})); urunBirlestir(paketUrunler, b.paketUrunler);
+                let kayit = {
+                    tarih: tarih, tarihIso: tarihIsoOlustur(tarih),
+                    ciro: (g.ciro || 0) + (b.ciro || 0), paketCiro: (g.paketCiro || 0) + (b.paketCiro || 0),
+                    nakit: (g.nakit || 0) + (b.nakit || 0), kart: (g.kart || 0) + (b.kart || 0),
+                    urunler, paketUrunler,
+                    masaDetaylari: (Array.isArray(g.masaDetaylari) ? g.masaDetaylari : []).concat(Array.isArray(b.masaDetaylari) ? b.masaDetaylari : []),
+                    paketDetaylari: (Array.isArray(g.paketDetaylari) ? g.paketDetaylari : []).concat(Array.isArray(b.paketDetaylari) ? b.paketDetaylari : [])
+                };
+                if (g.duzenlendi) kayit.duzenlendi = true;
+                tx.set(gRef, kayit);
+                tx.set(bRef, bosBugun(aktifIsGunuGetir()));
+            });
+            return true;
+        } catch (e) {
+            if (e === "BOS") return false;
+            throw e;
+        } finally {
+            kapanisDevam = false;
+        }
+    }
+
     function vardiyaDegisimKontrol() {
-        let suankiVardiya = aktifIsGunuGetir();
-        if (bugunVardiyaTarihi && bugunVardiyaTarihi !== suankiVardiya) {
+        if (!yuklendi.gecmis || !yuklendi.bugun || kapanisDevam) return;
+        let su = aktifIsGunuGetir();
+        if (bugunVardiyaTarihi && bugunVardiyaTarihi !== su) {
             if (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0) {
-                console.log(`[Vardiya Motoru] Önceki günün (${bugunVardiyaTarihi}) cirosu aktarılmamış. Otomatik aktarılıyor...`);
-                otomatikGunSonuUygula(bugunVardiyaTarihi);
+                let t = tarihNormalize(bugunVardiyaTarihi);
+                if (t) gunuKapat(t).catch(hataGoster);
             } else {
-                bugunVardiyaTarihi = suankiVardiya;
-                bugunVerileriniKaydet();
+                bugunVardiyaTarihi = su;
+                bugunVardiyaGuncelle(su);
             }
         }
     }
 
-    // 2) Gece saat 03:00 Otomatik Gün Sonu (Her 30 saniyede kontrol)
+    // Gece 03:00-03:30 arası otomatik kapanış (işlem idempotent; çift cihazda tek kayıt oluşur)
     setInterval(() => {
         let simdi = new Date();
-        // Gece 03:00 - 03:30 arasında otomatik kapanış tetiklenir
-        if (simdi.getHours() === 3 && simdi.getMinutes() <= 30) {
-            let hedefTarih = aktifIsGunuGetir();
-            let sonKapanis = localStorage.getItem("wt_otomatik_gunsonu_" + hedefTarih);
-
-            if (!sonKapanis && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
-                localStorage.setItem("wt_otomatik_gunsonu_" + hedefTarih, "TAMAMLANDI");
-                otomatikGunSonuUygula(hedefTarih);
-            }
+        if (simdi.getHours() === 3 && simdi.getMinutes() <= 30 && (bugunToplamCiro > 0 || bugunPaketToplamCiro > 0)) {
+            let hedef = aktifIsGunuGetir();
+            if (localStorage.getItem("wt_otomatik_gunsonu_" + hedef)) return;
+            gunuKapat(hedef).then(ok => { if (ok) localStorage.setItem("wt_otomatik_gunsonu_" + hedef, "TAMAMLANDI"); }).catch(hataGoster);
         }
     }, 30000);
-
-    // Otomatik aktarım fonksiyonu
-    function otomatikGunSonuUygula(aktarilacakTarih) {
-        let mevcutGun = gecmisGunler.find(g => g.tarih === aktarilacakTarih);
-
-        if (mevcutGun) {
-            let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
-            let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
-            let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
-            let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
-            
-            let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
-            for (let urunAdi in bugunUrunSatis) {
-                let ekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
-                let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
-                if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
-                yeniUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
-            }
-
-            let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
-            for (let urunAdi in bugunPaketUrunSatis) {
-                let ekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
-                let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
-                if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
-                yeniPaketUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
-            }
-
-            let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
-            let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
-
-            db.collection("gecmis").doc(mevcutGun.id).update({
-                ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
-                urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
-            }).then(() => {
-                sifirlaVeYeniGuneBasla();
-                console.log(`[Otomatik Gün Sonu] ${aktarilacakTarih} kaydına eklendi ve yeni gün açıldı.`);
-            });
-
-        } else {
-            let tarihIso = new Date().toISOString();
-            db.collection("gecmis").add({
-                tarih: aktarilacakTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
-                nakit: bugunNakitCiro, kart: bugunKartCiro, 
-                urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
-                paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
-                masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
-                paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
-            }).then(() => {
-                sifirlaVeYeniGuneBasla();
-                console.log(`[Otomatik Gün Sonu] ${aktarilacakTarih} tarihiyle gün sonu yapıldı.`);
-            });
-        }
-    }
-
-    function sifirlaVeYeniGuneBasla() {
-        bugunToplamCiro = 0; bugunPaketToplamCiro = 0; bugunNakitCiro = 0; bugunKartCiro = 0;
-        bugunUrunSatis = {}; bugunPaketUrunSatis = {}; bugunMasaDetaylari = []; bugunPaketDetaylari = [];
-        bugunVardiyaTarihi = aktifIsGunuGetir();
-        bugunVerileriniKaydet();
-    }
 
     function gecmisModalAc() {
         document.getElementById("gecmisModalEkrani").style.display = "flex";
@@ -832,7 +852,7 @@
         seciliMasa = masaNo.toString();
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         
-        iskontoUygula(0);
+        iskontoUygula(Number(masalar['i' + seciliMasa]) || 0, true);
         hesapBol(1);
 
         let isPaketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
@@ -945,7 +965,7 @@
         }
         siparisiGoster();
         tumMasaDurumlariniGuncelle();
-        masalariKaydet();
+        masalariKaydet(seciliMasa);
     }
 
     function adetDegistir(index, miktar) {
@@ -960,7 +980,7 @@
         }
         siparisiGoster();
         tumMasaDurumlariniGuncelle();
-        masalariKaydet();
+        masalariKaydet(seciliMasa);
     }
 
     function topluPaketFiyatiGuncelle(yeniTutar) {
@@ -974,15 +994,35 @@
     function urunIkramToggle(index) {
         let siparis = masalar[seciliMasa];
         if (!siparis || !siparis[index]) return;
-
-        siparis[index].ikramMi = !siparis[index].ikramMi;
+        let satir = siparis[index];
+        let adet = parseInt(satir.adet, 10) || 1;
+        let n = adet;
+        if (!satir.ikramMi && adet > 1) {
+            let g = prompt(`Kaç adet ikram edilsin? (1-${adet})`, adet);
+            if (g === null) return;
+            n = Math.min(adet, Math.max(1, parseInt(g, 10) || 1));
+        }
+        if (n >= adet) {
+            satir.ikramMi = !satir.ikramMi;
+            let es = siparis.findIndex((u, i) => i !== index && u.ad === satir.ad && !!u.ikramMi === !!satir.ikramMi);
+            if (es > -1) { siparis[es].adet = (parseInt(siparis[es].adet, 10) || 0) + adet; siparis.splice(index, 1); }
+        } else {
+            satir.adet = adet - n;
+            let ik = siparis.find(u => u.ad === satir.ad && u.ikramMi);
+            if (ik) ik.adet = (parseInt(ik.adet, 10) || 0) + n;
+            else siparis.splice(index + 1, 0, { ad: satir.ad, fiyat: satir.fiyat, adet: n, ikramMi: true });
+        }
         siparisiGoster();
         tumMasaDurumlariniGuncelle();
-        masalariKaydet();
+        masalariKaydet(seciliMasa);
     }
 
-    function iskontoUygula(yuzde) {
+    function iskontoUygula(yuzde, sadeceGoster) {
         aktifIskontoOrani = yuzde;
+        if (!sadeceGoster && seciliMasa) {
+            masalar['i' + seciliMasa] = yuzde;
+            db.collection("pos_data").doc("masalar").set({ ['i' + seciliMasa]: yuzde }, { merge: true }).catch(hataGoster);
+        }
         [0, 10, 20, 50].forEach(val => {
             let btn = document.getElementById("ikramBtn" + val);
             if (btn) {
@@ -1148,7 +1188,7 @@
                     if (isPaketKanal) {
                         toplam = paketToplamTutarlari[key] || 0;
                     } else {
-                        toplam = siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat || 0)) * (parseInt(urun.adet, 10) || 0)), 0);
+                        toplam = (1 - (Number(masalar['i' + key]) || 0) / 100) * siparis.reduce((sum, urun) => sum + ((urun.ikramMi ? 0 : Number(urun.fiyat || 0)) * (parseInt(urun.adet, 10) || 0)), 0);
                     }
 
                     durum.innerText = Math.round(toplam) + " ₺";
@@ -1208,7 +1248,7 @@
             masaIsimleriniKaydet();
         }
 
-        masalariKaydet();
+        masalariKaydet(seciliMasa, hedefMasa);
         siparisEkraniKapat();
         alert(`Siparişler ${varsayilanIsimGetir(hedefMasa)} alanına taşındı.`);
     }
@@ -1260,7 +1300,7 @@
             kartInput.value = Math.max(0, Math.round(toplam - nakitVal));
         } else {
             let kartVal = parseFloat(kartInput.value) || 0;
-            if (kartVal > toplam) { kartVal = toplam; kartInput.value = total; }
+            if (kartVal > toplam) { kartVal = toplam; kartInput.value = toplam; }
             nakitInput.value = Math.max(0, Math.round(toplam - kartVal));
         }
     }
@@ -1286,70 +1326,74 @@
         hesapKapatDetayli(nakitTutar, kartTutar);
     }
 
-    function hesapKapatDetayli(nakitTutar, kartTutar) {
-        let siparis = masalar[seciliMasa];
-        let isPaket = (seciliMasa === 'p1' || seciliMasa === 'p2');
-        let odenecekTutar = isPaket ? (paketToplamTutarlari[seciliMasa] || 0) : (nakitTutar + kartTutar);
+    async function hesapKapatDetayli(nakitTutar, kartTutar) {
+        const tid = seciliMasa;
+        if (!tid || !yuklendi.masalar || !yuklendi.bugun) return;
+        const isPaket = (tid === 'p1' || tid === 'p2');
+        const col = db.collection("pos_data");
+        const refM = col.doc("masalar"), refB = col.doc("bugun"), refN = col.doc("masaIsimleri"), refP = col.doc("paketToplamTutarlari");
+        const masaIsmi = masaIsimleri[tid] || varsayilanIsimGetir(tid);
+        const saatStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        let odenen = 0;
+        try {
+            await db.runTransaction(async (tx) => {
+                let [mS, bS, pS] = await Promise.all([tx.get(refM), tx.get(refB), tx.get(refP)]);
+                let md = mS.exists ? mS.data() : {};
+                let siparis = md[tid] || [];
+                if (siparis.length === 0) throw new Error("Bu masa başka bir cihazdan zaten kapatılmış veya boş.");
+                let su = aktifIsGunuGetir();
+                let b = bS.exists ? bS.data() : bosBugun(su);
+                if (b.vardiyaTarihi && b.vardiyaTarihi !== su && ((b.ciro || 0) > 0 || (b.paketCiro || 0) > 0))
+                    throw new Error("Önceki iş gününün kapanışı henüz yapılmadı, birkaç saniye sonra tekrar deneyin.");
 
-        let hedefSatisObjesi = isPaket ? bugunPaketUrunSatis : bugunUrunSatis;
-        let masaUrunOzet = [];
+                let isk = isPaket ? 0 : (Number(md['i' + tid]) || 0);
+                let carpan = 1 - isk / 100;
+                if (isPaket) {
+                    odenen = Number((pS.exists ? pS.data() : {})[tid]) || 0;
+                    if (odenen <= 0) throw new Error("Paket toplam tutarı girilmedi.");
+                } else {
+                    let sunucuTutar = carpan * siparis.reduce((s, u) => s + ((u.ikramMi ? 0 : Number(u.fiyat || 0)) * (parseInt(u.adet, 10) || 0)), 0);
+                    if (Math.round(nakitTutar + kartTutar) !== Math.round(sunucuTutar))
+                        throw new Error("Masa tutarı başka bir cihazda değişti, ekranı kontrol edip tekrar deneyin.");
+                    odenen = nakitTutar + kartTutar;
+                }
 
-        siparis.forEach(urun => {
-            let urunAdi = urun.ikramMi ? `${urun.ad} (İkram)` : urun.ad;
-            let urunAdedi = parseInt(urun.adet, 10) || 1;
-            
-            if (!hedefSatisObjesi[urunAdi]) {
-                hedefSatisObjesi[urunAdi] = { adet: 0, fiyat: (urun.ikramMi ? 0 : Number(urun.fiyat || 0)) };
-            }
-            let mevcutAdet = parseInt(hedefSatisObjesi[urunAdi].adet, 10) || 0;
-            hedefSatisObjesi[urunAdi].adet = mevcutAdet + urunAdedi;
-            hedefSatisObjesi[urunAdi].fiyat = (urun.ikramMi ? 0 : Number(urun.fiyat || 0));
+                let hedef = JSON.parse(JSON.stringify((isPaket ? b.paketUrunler : b.urunler) || {}));
+                let ozet = [];
+                siparis.forEach(u => {
+                    let ad = u.ikramMi ? `${u.ad} (İkram)` : u.ad;
+                    let adet = parseInt(u.adet, 10) || 1;
+                    let fiyat = u.ikramMi ? 0 : Number(u.fiyat || 0);
+                    urunBirlestir(hedef, { [ad]: { adet: adet, fiyat: fiyat, toplam: fiyat * carpan * adet } });
+                    ozet.push(`${adet}x ${ad}`);
+                });
 
-            masaUrunOzet.push(`${urunAdedi}x ${urunAdi}`);
-        });
-
-        let simdi = new Date();
-        let saatStr = simdi.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        let masaIsmi = masaIsimleri[seciliMasa] || varsayilanIsimGetir(seciliMasa);
-
-        if (isPaket) {
-            bugunPaketToplamCiro += odenecekTutar;
-            bugunPaketDetaylari.push({
-                masaAdi: masaIsmi,
-                harcama: odenecekTutar,
-                saat: saatStr,
-                urunlerDetay: masaUrunOzet.join(", ")
+                let yb = Object.assign(bosBugun(su), b);
+                yb.vardiyaTarihi = b.vardiyaTarihi || su;
+                if (isPaket) {
+                    yb.paketCiro = (b.paketCiro || 0) + odenen;
+                    yb.paketUrunler = hedef;
+                    yb.paketDetaylari = (Array.isArray(b.paketDetaylari) ? b.paketDetaylari : []).concat([{ masaAdi: masaIsmi, harcama: odenen, saat: saatStr, urunlerDetay: ozet.join(", ") }]);
+                } else {
+                    yb.ciro = (b.ciro || 0) + odenen;
+                    yb.nakit = (b.nakit || 0) + nakitTutar;
+                    yb.kart = (b.kart || 0) + kartTutar;
+                    yb.urunler = hedef;
+                    let not = (nakitTutar > 0 && kartTutar > 0) ? ` (${Math.round(nakitTutar)} ₺ Nakit + ${Math.round(kartTutar)} ₺ Kart)` : (nakitTutar > 0 ? " (Nakit)" : " (Kart)");
+                    if (isk > 0) not += ` [%${isk} iskonto]`;
+                    yb.masaDetaylari = (Array.isArray(b.masaDetaylari) ? b.masaDetaylari : []).concat([{ masaAdi: masaIsmi + not, harcama: odenen, saat: saatStr, urunlerDetay: ozet.join(", ") }]);
+                }
+                tx.set(refB, yb);
+                tx.set(refM, { [tid]: [], ['i' + tid]: FieldValue.delete() }, { merge: true });
+                tx.set(refN, { [tid]: FieldValue.delete() }, { merge: true });
+                tx.set(refP, { [tid]: FieldValue.delete() }, { merge: true });
             });
-        } else {
-            bugunToplamCiro += odenecekTutar;
-            bugunNakitCiro += nakitTutar;
-            bugunKartCiro += kartTutar;
-
-            let odemeSekliNot = "";
-            if (nakitTutar > 0 && kartTutar > 0) odemeSekliNot = ` (${Math.round(nakitTutar)} ₺ Nakit + ${Math.round(kartTutar)} ₺ Kart)`;
-            else if (nakitTutar > 0) odemeSekliNot = " (Nakit)";
-            else odemeSekliNot = " (Kart)";
-
-            bugunMasaDetaylari.push({
-                masaAdi: masaIsmi + odemeSekliNot,
-                harcama: odenecekTutar,
-                saat: saatStr,
-                urunlerDetay: masaUrunOzet.join(", ")
-            });
+        } catch (e) {
+            hataGoster(e);
+            return;
         }
 
-        bugunVardiyaTarihi = aktifIsGunuGetir();
-        bugunVerileriniKaydet();
-
-        alert(`${masaIsmi} ödemesi alındı.\nTutar: ${Math.round(odenecekTutar)} ₺`);
-
-        masalar[seciliMasa] = [];
-        delete masaIsimleri[seciliMasa];
-        delete paketToplamTutarlari[seciliMasa];
-        
-        masaIsimleriniKaydet();
-        paketTutarlariniKaydet();
-        masalariKaydet();
+        alert(`${masaIsmi} ödemesi alındı.\nTutar: ${Math.round(odenen)} ₺`);
 
         let mobilOverlay = document.getElementById("mobilSepetModalOverlay");
         if (mobilOverlay) {
@@ -1358,7 +1402,6 @@
             document.querySelector(".ekran-govde").appendChild(sepet);
             sepet.style.display = "none";
         }
-        
         ekraniKapat('odemeTipiEkrani');
         siparisEkraniKapat();
     }
@@ -1401,7 +1444,7 @@
                     let adet = typeof item === 'object' ? parseInt(item.adet, 10) : parseInt(item, 10);
                     adet = isNaN(adet) ? 0 : adet;
 
-                    if (adet > 300) continue;
+                    if (adet <= 0) continue;
 
                     if (!tumUrunler[ad]) tumUrunler[ad] = 0;
                     tumUrunler[ad] += adet;
@@ -1448,7 +1491,7 @@
             
             html += `
                 <div class="gecmis-satir">
-                    <div class="tarih">📅 ${tarihGoster}</div>
+                    <div class="tarih">📅 ${tarihGoster}${gun.duzenlendi ? '<br><small style="font-weight:normal;color:#dd6b20;">✏️ elle düzenlendi (ürün detayı eski olabilir)</small>' : ''}</div>
                     <div class="ciro-ozet">
                         <div class="ciro">Masa: ${mCiro} ₺ | Paket: ${pCiro} ₺</div>
                         <div class="odeme-detay">💵 Nakit: ${nakit} ₺ / 💳 Kart: ${kart} ₺</div>
@@ -1494,7 +1537,8 @@
             ciro: yeniMasaCiro,
             paketCiro: yeniPaketCiro,
             nakit: yeniNakit,
-            kart: yeniKart
+            kart: yeniKart,
+            duzenlendi: true
         }).then(() => {
             ekraniKapat("gecmisDuzenleModal");
             alert("Kayıt başarıyla güncellendi!");
@@ -1503,124 +1547,48 @@
         });
     }
 
-    // MANUEL GÜNÜ BİTİR: Otomatik olarak o anki vardiyanın tarihini (gece 01:00 ise dünün tarihini) önerir
-    function gunuBitir() {
+    async function gunuBitir() {
         if (bugunToplamCiro === 0 && bugunPaketToplamCiro === 0) {
             alert("Bugün henüz hiç ciro yapılmadı, günü aktaramazsınız.");
             return;
         }
-
-        let varsayilanTarih = bugunVardiyaTarihi || aktifIsGunuGetir();
-        let secilenTarih = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (Gece saatlerinde otomatik olarak vardiyanın ait olduğu tarih seçilir):", varsayilanTarih);
-
-        if (!secilenTarih) return;
-        secilenTarih = secilenTarih.trim();
-
-        if (confirm(`${secilenTarih} tarihine aktarılıyor:\n\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺\n\nOnaylıyor musunuz?`)) {
-            
-            let mevcutGun = gecmisGunler.find(g => g.tarih === secilenTarih);
-
-            if (mevcutGun) {
-                let yeniCiro = (mevcutGun.ciro || 0) + bugunToplamCiro;
-                let yeniPaketCiro = (mevcutGun.paketCiro || 0) + bugunPaketToplamCiro;
-                let yeniNakit = (mevcutGun.nakit || 0) + bugunNakitCiro;
-                let yeniKart = (mevcutGun.kart || 0) + bugunKartCiro;
-                
-                let yeniUrunler = JSON.parse(JSON.stringify(mevcutGun.urunler || {}));
-                for (let urunAdi in bugunUrunSatis) {
-                    let ekAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
-                    let fiyat = Number(bugunUrunSatis[urunAdi].fiyat || 0);
-                    if (!yeniUrunler[urunAdi]) yeniUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                    let mevAdet = typeof yeniUrunler[urunAdi] === 'object' ? (parseInt(yeniUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniUrunler[urunAdi], 10) || 0);
-                    yeniUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
-                }
-
-                let yeniPaketUrunler = JSON.parse(JSON.stringify(mevcutGun.paketUrunler || {}));
-                for (let urunAdi in bugunPaketUrunSatis) {
-                    let ekAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
-                    let fiyat = Number(bugunPaketUrunSatis[urunAdi].fiyat || 0);
-                    if (!yeniPaketUrunler[urunAdi]) yeniPaketUrunler[urunAdi] = { adet: 0, fiyat: fiyat };
-                    let mevAdet = typeof yeniPaketUrunler[urunAdi] === 'object' ? (parseInt(yeniPaketUrunler[urunAdi].adet, 10) || 0) : (parseInt(yeniPaketUrunler[urunAdi], 10) || 0);
-                    yeniPaketUrunler[urunAdi] = { adet: mevAdet + ekAdet, fiyat: fiyat };
-                }
-
-                let yeniMasaDetaylari = Array.isArray(mevcutGun.masaDetaylari) ? [...mevcutGun.masaDetaylari, ...bugunMasaDetaylari] : [...bugunMasaDetaylari];
-                let yeniPaketDetaylari = Array.isArray(mevcutGun.paketDetaylari) ? [...mevcutGun.paketDetaylari, ...bugunPaketDetaylari] : [...bugunPaketDetaylari];
-
-                db.collection("gecmis").doc(mevcutGun.id).update({
-                    ciro: yeniCiro, paketCiro: yeniPaketCiro, nakit: yeniNakit, kart: yeniKart,
-                    urunler: yeniUrunler, paketUrunler: yeniPaketUrunler, masaDetaylari: yeniMasaDetaylari, paketDetaylari: yeniPaketDetaylari
-                }).then(() => {
-                    sifirlaVeYeniGuneBasla();
-                    alert(`${secilenTarih} tarihli mevcut kaydın üzerine eklendi!`);
-                });
-
-            } else {
-                let tarihIso = new Date().toISOString();
-                db.collection("gecmis").add({
-                    tarih: secilenTarih, tarihIso: tarihIso, ciro: bugunToplamCiro, paketCiro: bugunPaketToplamCiro,
-                    nakit: bugunNakitCiro, kart: bugunKartCiro, 
-                    urunler: JSON.parse(JSON.stringify(bugunUrunSatis)),
-                    paketUrunler: JSON.parse(JSON.stringify(bugunPaketUrunSatis)),
-                    masaDetaylari: JSON.parse(JSON.stringify(bugunMasaDetaylari)),
-                    paketDetaylari: JSON.parse(JSON.stringify(bugunPaketDetaylari))
-                }).then(() => {
-                    sifirlaVeYeniGuneBasla();
-                    alert(`${secilenTarih} tarihiyle gün başarıyla aktarıldı!`);
-                });
-            }
-        }
+        let giris = prompt("Günü hangi tarihe aktarmak istiyorsunuz? (GG.AA.YYYY)", bugunVardiyaTarihi || aktifIsGunuGetir());
+        if (!giris) return;
+        let secilenTarih = tarihNormalize(giris);
+        if (!secilenTarih) { alert("Geçersiz tarih. Örnek: 07.10.2026"); return; }
+        if (!confirm(`${secilenTarih} tarihine aktarılıyor:\n\nMasa Cirosu: ${Math.round(bugunToplamCiro)} ₺\nPaket Cirosu: ${Math.round(bugunPaketToplamCiro)} ₺\n\nOnaylıyor musunuz?`)) return;
+        try {
+            let ok = await gunuKapat(secilenTarih);
+            alert(ok ? `${secilenTarih} tarihiyle gün aktarıldı!` : "Aktarılacak ciro yok veya başka bir kapanış sürüyor.");
+        } catch (e) { hataGoster(e); }
     }
 
-    function gunuGeriYukleDoc(docId) {
-        let silinecekGun = gecmisGunler.find(g => g.id === docId);
-        if (!silinecekGun) return;
-
-        let onay = confirm(`⚠️ DİKKAT!\n\n${silinecekGun.tarih || 'Bu günün'} cirosunu bugünkü ciroya geri yüklemek ve geçmiş listesinden silmek istediğinize emin misiniz?`);
-        if (!onay) return;
-
-        bugunToplamCiro += (silinecekGun.ciro || 0);
-        bugunPaketToplamCiro += (silinecekGun.paketCiro || 0);
-        bugunNakitCiro += (silinecekGun.nakit || 0);
-        bugunKartCiro += (silinecekGun.kart || 0);
-
-        if (silinecekGun.urunler) {
-            for (let urunAdi in silinecekGun.urunler) {
-                let item = silinecekGun.urunler[urunAdi];
-                let adet = typeof item === 'object' ? (parseInt(item.adet, 10) || 0) : (parseInt(item, 10) || 0);
-                let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
-
-                if (!bugunUrunSatis[urunAdi]) bugunUrunSatis[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = parseInt(bugunUrunSatis[urunAdi].adet, 10) || 0;
-                bugunUrunSatis[urunAdi].adet = mevAdet + adet;
-                bugunUrunSatis[urunAdi].fiyat = fiyat;
-            }
-        }
-
-        if (silinecekGun.paketUrunler) {
-            for (let urunAdi in silinecekGun.paketUrunler) {
-                let item = silinecekGun.paketUrunler[urunAdi];
-                let adet = typeof item === 'object' ? (parseInt(item.adet, 10) || 0) : (parseInt(item, 10) || 0);
-                let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
-
-                if (!bugunPaketUrunSatis[urunAdi]) bugunPaketUrunSatis[urunAdi] = { adet: 0, fiyat: fiyat };
-                let mevAdet = parseInt(bugunPaketUrunSatis[urunAdi].adet, 10) || 0;
-                bugunPaketUrunSatis[urunAdi].adet = mevAdet + adet;
-                bugunPaketUrunSatis[urunAdi].fiyat = fiyat;
-            }
-        }
-
-        if (Array.isArray(silinecekGun.masaDetaylari)) {
-            bugunMasaDetaylari = [...bugunMasaDetaylari, ...silinecekGun.masaDetaylari];
-        }
-        if (Array.isArray(silinecekGun.paketDetaylari)) {
-            bugunPaketDetaylari = [...bugunPaketDetaylari, ...silinecekGun.paketDetaylari];
-        }
-
-        db.collection("gecmis").doc(docId).delete().then(() => {
-            bugunVerileriniKaydet();
+    async function gunuGeriYukleDoc(docId) {
+        let gun = gecmisGunler.find(g => g.id === docId);
+        if (!gun) return;
+        if (!confirm(`⚠️ DİKKAT!\n\n${gun.tarih || 'Bu günün'} cirosunu bugünkü ciroya geri yüklemek ve geçmiş listesinden silmek istediğinize emin misiniz?`)) return;
+        let gRef = db.collection("gecmis").doc(docId);
+        let bRef = db.collection("pos_data").doc("bugun");
+        try {
+            await db.runTransaction(async (tx) => {
+                let gS = await tx.get(gRef), bS = await tx.get(bRef);
+                if (!gS.exists) throw new Error("Kayıt zaten silinmiş.");
+                let g = gS.data();
+                let b = bS.exists ? bS.data() : bosBugun(aktifIsGunuGetir());
+                let urunler = JSON.parse(JSON.stringify(b.urunler || {})); urunBirlestir(urunler, g.urunler);
+                let paketUrunler = JSON.parse(JSON.stringify(b.paketUrunler || {})); urunBirlestir(paketUrunler, g.paketUrunler);
+                tx.set(bRef, {
+                    ciro: (b.ciro || 0) + (g.ciro || 0), paketCiro: (b.paketCiro || 0) + (g.paketCiro || 0),
+                    nakit: (b.nakit || 0) + (g.nakit || 0), kart: (b.kart || 0) + (g.kart || 0),
+                    urunler, paketUrunler,
+                    masaDetaylari: (Array.isArray(b.masaDetaylari) ? b.masaDetaylari : []).concat(Array.isArray(g.masaDetaylari) ? g.masaDetaylari : []),
+                    paketDetaylari: (Array.isArray(b.paketDetaylari) ? b.paketDetaylari : []).concat(Array.isArray(g.paketDetaylari) ? g.paketDetaylari : []),
+                    vardiyaTarihi: b.vardiyaTarihi || aktifIsGunuGetir()
+                });
+                tx.delete(gRef);
+            });
             alert("Kayıt bugüne aktarıldı ve geçmişten silindi!");
-        });
+        } catch (e) { hataGoster(e); }
     }
 
     function gecmisSilDoc(docId) {
@@ -1663,12 +1631,13 @@
                 let fiyat = typeof item === 'object' ? Number(item.fiyat || 0) : 0;
                 
                 adet = isNaN(adet) ? 0 : adet;
-                if (adet > 300 || adet <= 0) continue;
+                if (adet <= 0) continue;
 
                 if (!birlesikUrunler[u]) {
-                    birlesikUrunler[u] = { adet: 0, fiyat: fiyat };
+                    birlesikUrunler[u] = { adet: 0, fiyat: fiyat, toplam: 0 };
                 }
                 birlesikUrunler[u].adet += adet;
+                birlesikUrunler[u].toplam += (typeof item === 'object' && item.toplam !== undefined) ? Number(item.toplam) : adet * fiyat;
                 if (fiyat > 0) birlesikUrunler[u].fiyat = fiyat;
             }
         }
@@ -1697,7 +1666,7 @@
                 let item = urunler[urunAdi];
                 let adet = parseInt(item.adet, 10) || 0;
                 let fiyat = Number(item.fiyat || 0);
-                let toplamTutar = adet * fiyat;
+                let toplamTutar = item.toplam !== undefined ? Number(item.toplam) : adet * fiyat;
                 genelToplam += toplamTutar;
 
                 tbody.innerHTML += `
