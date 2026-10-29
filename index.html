@@ -219,6 +219,42 @@
             .gecmis-satir .ciro-ozet { text-align: left; }
             .header-ciro-alani { flex-direction: column; gap: 6px; }
         }
+
+        /* ---- Fiyat Güncelle & Oyuncak ---- */
+        .header-buton-satiri { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
+        .gecmis-ac-header-btn.fiyat-guncelle-btn { background: #2f855a; }
+        .gecmis-ac-header-btn.fiyat-guncelle-btn:hover { background: #276749; }
+        .fiyat-panel-arka { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 3000; justify-content: flex-end; }
+        .fiyat-panel { width: 480px; max-width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.25); animation: fiyatPanelGir 0.25s ease; }
+        @keyframes fiyatPanelGir { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .fiyat-panel-ust { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: #1e2025; color: #fff; }
+        .fiyat-panel-ust h2 { margin: 0; font-size: 18px; }
+        .fiyat-panel-not { padding: 10px 20px; background: #fffaf0; color: #7b341e; font-size: 12px; border-bottom: 1px solid #feebc8; line-height: 1.45; }
+        .fiyat-panel-govde { flex: 1; overflow-y: auto; padding: 14px 20px 24px; }
+        .fp-kat-baslik { background: #f1f3f7; color: #2d3748; padding: 9px 12px; border-radius: 8px; margin: 18px 0 8px; font-weight: 700; font-size: 14px; border-left: 4px solid #4a5568; }
+        .fp-satir { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #edf2f7; }
+        .fp-ad { flex: 1; font-size: 14px; color: #1a202c; word-break: break-word; }
+        .fp-ad-input { flex: 1; min-width: 0; padding: 7px 8px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; }
+        .fp-fiyat { width: 84px; padding: 7px 8px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; text-align: right; }
+        .fp-tl { color: #718096; font-size: 13px; }
+        .fp-sil { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; border-radius: 8px; padding: 6px 9px; cursor: pointer; font-size: 13px; }
+        .fp-sil:hover { background: #fed7d7; }
+        .fp-ekle-satir { display: flex; gap: 8px; margin-top: 10px; padding: 8px; background: #f7fafc; border: 1px dashed #cbd5e0; border-radius: 8px; }
+        .fp-ekle-satir input[type=text] { flex: 1; min-width: 0; padding: 7px 8px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; }
+        .fp-ekle-btn { background: #3182ce; color: #fff; border: none; border-radius: 8px; padding: 7px 12px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .fp-ekle-btn:hover { background: #2b6cb0; }
+        .fiyat-panel-alt { padding: 14px 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
+        .fp-kaydet { flex: 1; background: #38a169; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .fp-kaydet:hover { background: #2f855a; }
+        .fp-vazgec { background: #edf2f7; color: #2d3748; border: none; border-radius: 10px; padding: 13px 18px; font-weight: bold; cursor: pointer; }
+        .fiyat-sifre-kutu { background: #fff; border-radius: 16px; padding: 26px; width: 340px; max-width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; }
+        .fiyat-sifre-kutu h3 { margin: 0 0 6px; color: #1a202c; }
+        .fiyat-sifre-kutu p { margin: 0 0 14px; color: #718096; font-size: 13px; }
+        .fiyat-sifre-kutu input { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 16px; text-align: center; box-sizing: border-box; }
+        .fiyat-sifre-hata { display: none; color: #e53e3e; font-size: 13px; margin-top: 8px; }
+        .fiyat-sifre-butonlar { display: flex; gap: 10px; margin-top: 14px; }
+        .fiyat-sifre-butonlar button { flex: 1; padding: 11px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .oyuncak-bos-mesaj { color: #718096; font-size: 14px; padding: 10px 4px; }
     </style>
 </head>
 
@@ -263,7 +299,10 @@
             </div>
         </div>
 
-        <button class="gecmis-ac-header-btn" onclick="gecmisModalAc()">📊 Geçmiş & Analiz</button>
+        <div class="header-buton-satiri">
+            <button class="gecmis-ac-header-btn fiyat-guncelle-btn" onclick="fiyatSifreAc()">💰 Fiyat Güncelle</button>
+            <button class="gecmis-ac-header-btn" onclick="gecmisModalAc()">📊 Geçmiş & Analiz</button>
+        </div>
     </div>
 </header>
 
@@ -301,6 +340,41 @@
         <div class="masa paket-kart" id="masaKartp2" onclick="masaAc('p2')"><h2 id="masaBaslikKartp2">Yemeksepeti</h2><div id="durump2" class="durum-rozeti bos">Müsait</div></div>
         <div class="masa paket-kart" id="masaKarttw" onclick="masaAc('tw')"><h2 id="masaBaslikKarttw">Take Away Paket</h2><div id="durumtw" class="durum-rozeti bos">Müsait</div></div>
     </div>
+
+    <div class="bolum-baslik">🧸 Oyuncak</div>
+    <div class="paketler">
+        <div class="masa" id="masaKartoy" onclick="masaAc('oy')"><h2 id="masaBaslikKartoy">Oyuncak</h2><div id="durumoy" class="durum-rozeti bos">Müsait</div></div>
+    </div>
+</div>
+
+<!-- Fiyat Güncelle: şifre -->
+<div id="fiyatSifreEkrani" class="modal-overlay">
+    <div class="fiyat-sifre-kutu">
+        <h3>🔒 Fiyat Güncelle</h3>
+        <p>Devam etmek için şifreyi girin.</p>
+        <input type="password" id="fiyatSifreInput" placeholder="Şifre" autocomplete="off" onkeydown="if(event.key==='Enter') fiyatSifreKontrol()">
+        <div id="fiyatSifreHata" class="fiyat-sifre-hata">Şifre yanlış.</div>
+        <div class="fiyat-sifre-butonlar">
+            <button style="background:#edf2f7;color:#2d3748;" onclick="ekraniKapat('fiyatSifreEkrani')">Vazgeç</button>
+            <button style="background:#38a169;color:#fff;" onclick="fiyatSifreKontrol()">Giriş</button>
+        </div>
+    </div>
+</div>
+
+<!-- Fiyat Güncelle: sağ panel -->
+<div id="fiyatPanelArka" class="fiyat-panel-arka" onclick="if(event.target===this) fiyatPaneliKapat()">
+    <div class="fiyat-panel">
+        <div class="fiyat-panel-ust">
+            <h2>💰 Menü & Fiyatlar</h2>
+            <button class="kapat" onclick="fiyatPaneliKapat()">Kapat</button>
+        </div>
+        <div class="fiyat-panel-not">Yaptığınız değişiklikler <strong>Kaydet</strong>'ten sonra geçerli olur ve sadece sonraki siparişlere uygulanır. Geçmiş cirolar, geçmişteki ürün isimleri ve masalarda zaten girilmiş kalemler değişmez.</div>
+        <div class="fiyat-panel-govde" id="fiyatPanelGovde"></div>
+        <div class="fiyat-panel-alt">
+            <button class="fp-vazgec" onclick="fiyatPaneliKapat()">Vazgeç</button>
+            <button class="fp-kaydet" id="fiyatKaydetBtn" onclick="fiyatPaneliKaydet()">💾 Kaydet</button>
+        </div>
+    </div>
 </div>
 
 <div id="siparisEkrani" class="modal-overlay">
@@ -316,74 +390,6 @@
 
         <div class="ekran-govde">
             <div class="urun-bolumu" id="urunBolumu">
-                <div class="kategori">
-                    <div class="kategoriBaslik">🧇 Waffle Çeşitleri</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="Çiçek Waffle" onclick="urunEkle('Çiçek Waffle',400)"><strong>Çiçek Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
-                        <button class="urun" data-ad="Brüksel Waffle" onclick="urunEkle('Brüksel Waffle',400)"><strong>Brüksel Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
-                        <button class="urun" data-ad="Bubble Waffle" onclick="urunEkle('Bubble Waffle',400)"><strong>Bubble Waffle</strong><span class="urun-fiyat-metni">400 ₺</span></button>
-                        <button class="urun" data-ad="Bardak Waffle" onclick="urunEkle('Bardak Waffle',250)"><strong>Bardak Waffle</strong><span class="urun-fiyat-metni">250 ₺</span></button>
-                    </div>
-                </div>
-
-                <div class="kategori">
-                    <div class="kategoriBaslik">☕ Sıcak İçecekler</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="Kupa Çay" onclick="urunEkle('Kupa Çay',50)"><strong>Kupa Çay</strong><span class="urun-fiyat-metni">50 ₺</span></button>
-                        <button class="urun" data-ad="Çay" onclick="urunEkle('Çay',35)"><strong>Çay</strong><span class="urun-fiyat-metni">35 ₺</span></button>
-                        <button class="urun" data-ad="Filtre Kahve" onclick="urunEkle('Filtre Kahve',100)"><strong>Filtre Kahve</strong><span class="urun-fiyat-metni">100 ₺</span></button>
-                        <button class="urun" data-ad="Türk Kahvesi" onclick="urunEkle('Türk Kahvesi',100)"><strong>Türk Kahvesi</strong><span class="urun-fiyat-metni">100 ₺</span></button>
-                    </div>
-                </div>
-
-                <div class="kategori">
-                    <div class="kategoriBaslik">🧋 Soğuk İçecekler</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="Limonata" onclick="urunEkle('Limonata',90)"><strong>Limonata</strong><span class="urun-fiyat-metni">90 ₺</span></button>
-                        <button class="urun" data-ad="Limonata (Şuruplu)" onclick="urunEkle('Limonata (Şuruplu)',110)"><strong>Limonata (Şuruplu)</strong><span class="urun-fiyat-metni">110 ₺</span></button>
-                        <button class="urun" data-ad="Special Kokteyl" onclick="urunEkle('Special Kokteyl',120)"><strong>Special Kokteyl</strong><span class="urun-fiyat-metni">120 ₺</span></button>
-                        <button class="urun" data-ad="Coca Cola" onclick="urunEkle('Coca Cola',90)"><strong>Coca Cola</strong><span class="urun-fiyat-metni">90 ₺</span></button>
-                        <button class="urun" data-ad="Coca Cola Zero" onclick="urunEkle('Coca Cola Zero',90)"><strong>Coca Cola Zero</strong><span class="urun-fiyat-metni">90 ₺</span></button>
-                        <button class="urun" data-ad="Sprite" onclick="urunEkle('Sprite',90)"><strong>Sprite</strong><span class="urun-fiyat-metni">90 ₺</span></button>
-                        <button class="urun" data-ad="Fanta" onclick="urunEkle('Fanta',90)"><strong>Fanta</strong><span class="urun-fiyat-metni">90 ₺</span></button>
-                        <button class="urun" data-ad="Niğde Gazozu" onclick="urunEkle('Niğde Gazozu',40)"><strong>Niğde Gazozu</strong><span class="urun-fiyat-metni">40 ₺</span></button>
-                        <button class="urun" data-ad="Maden Suyu" onclick="urunEkle('Maden Suyu',40)"><strong>Maden Suyu</strong><span class="urun-fiyat-metni">40 ₺</span></button>
-                        <button class="urun" data-ad="Su" onclick="urunEkle('Su',20)"><strong>Su</strong><span class="urun-fiyat-metni">20 ₺</span></button>
-                    </div>
-                </div>
-
-                <div class="kategori">
-                    <div class="kategoriBaslik">🧊 Soğuk Kahveler</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="Ice Americano" onclick="urunEkle('Ice Americano',120)"><strong>Ice Americano</strong><span class="urun-fiyat-metni">120 ₺</span></button>
-                        <button class="urun" data-ad="Ice Latte" onclick="urunEkle('Ice Latte',150)"><strong>Ice Latte</strong><span class="urun-fiyat-metni">150 ₺</span></button>
-                        <button class="urun" data-ad="Ice Caramel Latte" onclick="urunEkle('Ice Caramel Latte',190)"><strong>Ice Caramel Latte</strong><span class="urun-fiyat-metni">190 ₺</span></button>
-                        <button class="urun" data-ad="Ice Vanilla Latte" onclick="urunEkle('Ice Vanilla Latte',190)"><strong>Ice Vanilla Latte</strong><span class="urun-fiyat-metni">190 ₺</span></button>
-                        <button class="urun" data-ad="Ice Mocha" onclick="urunEkle('Ice Mocha',190)"><strong>Ice Mocha</strong><span class="urun-fiyat-metni">190 ₺</span></button>
-                    </div>
-                </div>
-
-                <div class="kategori">
-                    <div class="kategoriBaslik">🍨 Dondurma</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="1 Top Dondurma" onclick="urunEkle('1 Top Dondurma',60)"><strong>1 Top Dondurma</strong><span class="urun-fiyat-metni">60 ₺</span></button>
-                        <button class="urun" data-ad="Kilo Dondurma" onclick="urunEkle('Kilo Dondurma',1100)"><strong>Kilo Dondurma</strong><span class="urun-fiyat-metni">1100 ₺</span></button>
-                    </div>
-                </div>
-
-                <div class="kategori">
-                    <div class="kategoriBaslik">🧸 Oyuncaklı Menüler</div>
-                    <div class="urunler">
-                        <button class="urun" data-ad="Küçük Lego + Waffle" onclick="urunEkle('Küçük Lego + Waffle',500)"><strong>Küçük Lego + Waffle</strong><span class="urun-fiyat-metni">500 ₺</span></button>
-                        <button class="urun" data-ad="Büyük Lego + Waffle" onclick="urunEkle('Büyük Lego + Waffle',600)"><strong>Büyük Lego + Waffle</strong><span class="urun-fiyat-metni">600 ₺</span></button>
-                        <button class="urun" data-ad="Labubu + Waffle" onclick="urunEkle('Labubu + Waffle',600)"><strong>Labubu + Waffle</strong><span class="urun-fiyat-metni">600 ₺</span></button>
-                        <button class="urun" data-ad="Squeeze + Waffle" onclick="urunEkle('Squeeze + Waffle',700)"><strong>Squeeze + Waffle</strong><span class="urun-fiyat-metni">700 ₺</span></button>
-                        <button class="urun" data-ad="Hot Wheels + Waffle" onclick="urunEkle('Hot Wheels + Waffle',600)"><strong>Hot Wheels + Waffle</strong><span class="urun-fiyat-metni">600 ₺</span></button>
-                        <button class="urun" data-ad="Küçük Lego" onclick="urunEkle('Küçük Lego',150)"><strong>Küçük Lego</strong><span class="urun-fiyat-metni">150 ₺</span></button>
-                        <button class="urun" data-ad="Büyük Lego" onclick="urunEkle('Büyük Lego',250)"><strong>Büyük Lego</strong><span class="urun-fiyat-metni">250 ₺</span></button>
-                        <button class="urun" data-ad="Hot Wheels" onclick="urunEkle('Hot Wheels',200)"><strong>Hot Wheels</strong><span class="urun-fiyat-metni">200 ₺</span></button>
-                    </div>
-                </div>
             </div>
 
             <div class="sepet-bolumu" id="sepetBolumu">
@@ -579,7 +585,7 @@
     let aktifBolmeSayisi = 1;
     let secilenCihaz = 'pc';
 
-    const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','tw','p1','p2'];
+    const tumAlanIDleri = ['1','2','3','4','5','6','7','8','9','10','11','12','tw','oy','p1','p2'];
 
     // VARDİYA HESAPLAMA MOTORU:
     // Saat 05:00'ten gece 04:59'a kadar olan süre TEK BİR İŞ GÜNÜDÜR.
@@ -638,10 +644,352 @@
 
     function varsayilanIsimGetir(key) {
         if (key === 'tw') return "Take Away Paket";
+        if (key === 'oy') return "Oyuncak";
         if (key === 'p1') return "UberEats";
         if (key === 'p2') return "Yemeksepeti";
         return "Masa " + key;
     }
+
+
+    // ================= MENÜ (dinamik) =================
+    const FIYAT_SIFRESI = 'evren';
+    const VARSAYILAN_MENU = [
+    {
+        "id": "waffle",
+        "baslik": "🧇 Waffle Çeşitleri",
+        "urunler": [
+            {
+                "ad": "Çiçek Waffle",
+                "fiyat": 400
+            },
+            {
+                "ad": "Brüksel Waffle",
+                "fiyat": 400
+            },
+            {
+                "ad": "Bubble Waffle",
+                "fiyat": 400
+            },
+            {
+                "ad": "Bardak Waffle",
+                "fiyat": 250
+            }
+        ]
+    },
+    {
+        "id": "sicak",
+        "baslik": "☕ Sıcak İçecekler",
+        "urunler": [
+            {
+                "ad": "Kupa Çay",
+                "fiyat": 50
+            },
+            {
+                "ad": "Çay",
+                "fiyat": 35
+            },
+            {
+                "ad": "Filtre Kahve",
+                "fiyat": 100
+            },
+            {
+                "ad": "Türk Kahvesi",
+                "fiyat": 100
+            },
+            {
+                "ad": "Sıcak Çikolata",
+                "fiyat": 200
+            }
+        ]
+    },
+    {
+        "id": "soguk",
+        "baslik": "🧋 Soğuk İçecekler",
+        "urunler": [
+            {
+                "ad": "Limonata",
+                "fiyat": 90
+            },
+            {
+                "ad": "Limonata (Şuruplu)",
+                "fiyat": 110
+            },
+            {
+                "ad": "Special Kokteyl",
+                "fiyat": 120
+            },
+            {
+                "ad": "Coca Cola",
+                "fiyat": 90
+            },
+            {
+                "ad": "Coca Cola Zero",
+                "fiyat": 90
+            },
+            {
+                "ad": "Sprite",
+                "fiyat": 90
+            },
+            {
+                "ad": "Fanta",
+                "fiyat": 90
+            },
+            {
+                "ad": "Niğde Gazozu",
+                "fiyat": 40
+            },
+            {
+                "ad": "Maden Suyu",
+                "fiyat": 40
+            },
+            {
+                "ad": "Su",
+                "fiyat": 20
+            }
+        ]
+    },
+    {
+        "id": "sogukkahve",
+        "baslik": "🧊 Soğuk Kahveler",
+        "urunler": [
+            {
+                "ad": "Ice Americano",
+                "fiyat": 120
+            },
+            {
+                "ad": "Ice Latte",
+                "fiyat": 150
+            },
+            {
+                "ad": "Ice Caramel Latte",
+                "fiyat": 190
+            },
+            {
+                "ad": "Ice Vanilla Latte",
+                "fiyat": 190
+            },
+            {
+                "ad": "Ice Mocha",
+                "fiyat": 190
+            }
+        ]
+    },
+    {
+        "id": "dondurma",
+        "baslik": "🍨 Dondurma",
+        "urunler": [
+            {
+                "ad": "1 Top Dondurma",
+                "fiyat": 60
+            },
+            {
+                "ad": "Kilo Dondurma",
+                "fiyat": 1100
+            }
+        ]
+    },
+    {
+        "id": "oyuncakli",
+        "baslik": "🧸 Oyuncaklı Menüler",
+        "urunler": [
+            {
+                "ad": "Küçük Lego + Waffle",
+                "fiyat": 500
+            },
+            {
+                "ad": "Büyük Lego + Waffle",
+                "fiyat": 600
+            },
+            {
+                "ad": "Labubu + Waffle",
+                "fiyat": 600
+            },
+            {
+                "ad": "Squeeze + Waffle",
+                "fiyat": 700
+            },
+            {
+                "ad": "Hot Wheels + Waffle",
+                "fiyat": 600
+            },
+            {
+                "ad": "Küçük Lego",
+                "fiyat": 150
+            },
+            {
+                "ad": "Büyük Lego",
+                "fiyat": 250
+            },
+            {
+                "ad": "Hot Wheels",
+                "fiyat": 200
+            }
+        ]
+    },
+    {
+        "id": "oyuncak",
+        "baslik": "🧸 Oyuncaklar",
+        "urunler": []
+    }
+];
+    let MENU = JSON.parse(JSON.stringify(VARSAYILAN_MENU));
+
+    function menuDogrula(m) {
+        if (!Array.isArray(m) || m.length === 0) return null;
+        let temiz = m.map(k => ({
+            id: String(k.id || ''), baslik: String(k.baslik || ''),
+            urunler: (Array.isArray(k.urunler) ? k.urunler : []).filter(u => u && u.ad).map(u => ({ ad: String(u.ad), fiyat: Number(u.fiyat) || 0 }))
+        }));
+        if (!temiz.some(k => k.id === 'oyuncak')) temiz.push(JSON.parse(JSON.stringify(VARSAYILAN_MENU.find(k => k.id === 'oyuncak'))));
+        return temiz;
+    }
+
+    function menuCiz() {
+        const kap = document.getElementById('urunBolumu');
+        if (!kap) return;
+        const oyuncakModu = (seciliMasa === 'oy');
+        const paketKanal = (seciliMasa === 'p1' || seciliMasa === 'p2');
+        kap.innerHTML = '';
+        MENU.forEach(kat => {
+            if ((kat.id === 'oyuncak') !== oyuncakModu) return;
+            const kutu = document.createElement('div'); kutu.className = 'kategori';
+            const bas = document.createElement('div'); bas.className = 'kategoriBaslik'; bas.textContent = kat.baslik;
+            kutu.appendChild(bas);
+            if (kat.urunler.length === 0) {
+                const bos = document.createElement('div'); bos.className = 'oyuncak-bos-mesaj';
+                bos.textContent = 'Bu bölümde henüz ürün yok. "Fiyat Güncelle" panelinden ekleyebilirsiniz.';
+                kutu.appendChild(bos);
+            } else {
+                const grid = document.createElement('div'); grid.className = 'urunler';
+                grid.style.gridTemplateColumns = (secilenCihaz === 'telefon') ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)';
+                kat.urunler.forEach(u => {
+                    const b = document.createElement('button'); b.className = 'urun'; b.setAttribute('data-ad', u.ad);
+                    const st = document.createElement('strong'); st.textContent = u.ad;
+                    const sp = document.createElement('span'); sp.className = 'urun-fiyat-metni'; sp.textContent = u.fiyat + ' ₺';
+                    if (paketKanal) sp.style.display = 'none';
+                    b.appendChild(st); b.appendChild(sp);
+                    b.addEventListener('click', () => urunEkle(u.ad, u.fiyat));
+                    grid.appendChild(b);
+                });
+                kutu.appendChild(grid);
+            }
+            kap.appendChild(kutu);
+        });
+    }
+    menuCiz();
+
+    // Menü Firestore'da pos_data/menu belgesinde tutulur (yoksa varsayılan menü kullanılır)
+    db.collection("pos_data").doc("menu").onSnapshot((doc) => {
+        try {
+            let d = doc.exists ? doc.data() : null;
+            let gelen = d ? menuDogrula(d.kategoriler) : null;
+            MENU = gelen || menuDogrula(JSON.parse(JSON.stringify(VARSAYILAN_MENU)));
+            menuCiz();
+            if (seciliMasa) siparisiGoster();
+        } catch (e) { console.error("Menü hatası:", e); }
+    }, (e) => console.error("Menü dinlenemedi:", e));
+
+    // ================= FİYAT GÜNCELLE PANELİ =================
+    let menuTaslak = null, menuTaslakIlk = '';
+
+    function fiyatSifreAc() {
+        const inp = document.getElementById('fiyatSifreInput');
+        inp.value = '';
+        document.getElementById('fiyatSifreHata').style.display = 'none';
+        document.getElementById('fiyatSifreEkrani').style.display = 'flex';
+        setTimeout(() => inp.focus(), 50);
+    }
+    function fiyatSifreKontrol() {
+        const inp = document.getElementById('fiyatSifreInput');
+        if (inp.value === FIYAT_SIFRESI) {
+            inp.value = '';
+            document.getElementById('fiyatSifreEkrani').style.display = 'none';
+            fiyatPaneliAc();
+        } else {
+            document.getElementById('fiyatSifreHata').style.display = 'block';
+            inp.select();
+        }
+    }
+    function fiyatPaneliAc() {
+        menuTaslak = JSON.parse(JSON.stringify(MENU));
+        menuTaslakIlk = JSON.stringify(menuTaslak);
+        fiyatPaneliCiz();
+        document.getElementById('fiyatPanelArka').style.display = 'flex';
+    }
+    function fiyatPaneliKapat() {
+        if (menuTaslak && JSON.stringify(menuTaslak) !== menuTaslakIlk) {
+            if (!confirm('Kaydedilmemiş değişiklikler var. Kapatılsın mı?')) return;
+        }
+        menuTaslak = null;
+        document.getElementById('fiyatPanelArka').style.display = 'none';
+    }
+    function fiyatPaneliCiz() {
+        const g = document.getElementById('fiyatPanelGovde');
+        g.innerHTML = '';
+        menuTaslak.forEach((kat, ki) => {
+            const bas = document.createElement('div'); bas.className = 'fp-kat-baslik'; bas.textContent = kat.baslik;
+            g.appendChild(bas);
+            kat.urunler.forEach((u, ui) => {
+                const satir = document.createElement('div'); satir.className = 'fp-satir';
+                const ad = document.createElement('input'); ad.type = 'text'; ad.className = 'fp-ad-input'; ad.value = u.ad;
+                ad.addEventListener('input', () => { u.ad = ad.value; });
+                const inp = document.createElement('input'); inp.type = 'number'; inp.min = '0'; inp.step = '1'; inp.className = 'fp-fiyat'; inp.value = u.fiyat;
+                inp.addEventListener('input', () => { menuTaslak[ki].urunler[ui].fiyat = inp.value === '' ? '' : Number(inp.value); });
+                const tl = document.createElement('span'); tl.className = 'fp-tl'; tl.textContent = '₺';
+                const sil = document.createElement('button'); sil.className = 'fp-sil'; sil.textContent = '🗑️'; sil.title = 'Menüden sil';
+                sil.addEventListener('click', () => {
+                    if (!confirm('"' + u.ad + '" menüden silinsin mi?\n(Geçmiş kayıtlar etkilenmez.)')) return;
+                    menuTaslak[ki].urunler.splice(ui, 1);
+                    fiyatPaneliCiz();
+                });
+                satir.appendChild(ad); satir.appendChild(inp); satir.appendChild(tl); satir.appendChild(sil);
+                g.appendChild(satir);
+            });
+            const ekle = document.createElement('div'); ekle.className = 'fp-ekle-satir';
+            const adIn = document.createElement('input'); adIn.type = 'text'; adIn.placeholder = 'Yeni ürün adı';
+            const fiIn = document.createElement('input'); fiIn.type = 'number'; fiIn.min = '0'; fiIn.step = '1'; fiIn.placeholder = 'Fiyat'; fiIn.className = 'fp-fiyat';
+            const btn = document.createElement('button'); btn.className = 'fp-ekle-btn'; btn.textContent = '+ Ekle';
+            btn.addEventListener('click', () => {
+                const yeniAd = adIn.value.trim();
+                const yeniFiyat = Number(fiIn.value);
+                if (!yeniAd) { alert('Ürün adı yazın.'); return; }
+                if (fiIn.value === '' || !isFinite(yeniFiyat) || yeniFiyat < 0) { alert('Geçerli bir fiyat girin.'); return; }
+                const var_mi = menuTaslak.some(k => k.urunler.some(u => u.ad.toLocaleLowerCase('tr') === yeniAd.toLocaleLowerCase('tr')));
+                if (var_mi) { alert('Menüde bu isimde bir ürün zaten var.'); return; }
+                menuTaslak[ki].urunler.push({ ad: yeniAd, fiyat: yeniFiyat });
+                fiyatPaneliCiz();
+            });
+            ekle.appendChild(adIn); ekle.appendChild(fiIn); ekle.appendChild(btn);
+            g.appendChild(ekle);
+        });
+    }
+    function fiyatPaneliKaydet() {
+        if (!menuTaslak) return;
+        const gorulen = new Set();
+        for (const k of menuTaslak) for (const u of k.urunler) {
+            u.ad = String(u.ad).trim();
+            if (!u.ad) { alert('Boş bırakılmış bir ürün adı var. Doldurun veya ürünü silin.'); return; }
+            const anahtar = u.ad.toLocaleLowerCase('tr');
+            if (gorulen.has(anahtar)) { alert('"' + u.ad + '" adı menüde birden fazla kez geçiyor. İsimler farklı olmalı.'); return; }
+            gorulen.add(anahtar);
+            if (u.fiyat === '' || !isFinite(Number(u.fiyat)) || Number(u.fiyat) < 0) { alert('"' + u.ad + '" için geçerli bir fiyat girin.'); return; }
+            u.fiyat = Number(u.fiyat);
+        }
+        const btn = document.getElementById('fiyatKaydetBtn');
+        btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+        db.collection("pos_data").doc("menu").set({ kategoriler: menuTaslak, guncellenme: Date.now() })
+            .then(() => {
+                MENU = JSON.parse(JSON.stringify(menuTaslak));
+                menuTaslak = null;
+                document.getElementById('fiyatPanelArka').style.display = 'none';
+                menuCiz();
+                if (seciliMasa) siparisiGoster();
+                alert('Menü kaydedildi. Yeni fiyatlar bundan sonraki siparişlerde geçerli.');
+            })
+            .catch(hataGoster)
+            .finally(() => { btn.disabled = false; btn.textContent = '💾 Kaydet'; });
+    }
+    // ================= /MENÜ =================
 
     const FieldValue = firebase.firestore.FieldValue;
     const GECMIS_GUN_SAYISI = 90;
@@ -851,6 +1199,7 @@
     function masaAc(masaNo) {
         seciliMasa = masaNo.toString();
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
+        menuCiz();
         
         iskontoUygula(Number(masalar['i' + seciliMasa]) || 0, true);
         hesapBol(1);
@@ -956,7 +1305,7 @@
         if (!masalar[seciliMasa]) masalar[seciliMasa] = [];
         let siparis = masalar[seciliMasa];
         
-        let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi);
+        let mevcutUrun = siparis.find(urun => urun.ad === urunAdi && !urun.ikramMi && Number(urun.fiyat) === Number(fiyat));
 
         if (mevcutUrun) {
             mevcutUrun.adet = (parseInt(mevcutUrun.adet, 10) || 0) + 1;
